@@ -7,11 +7,8 @@ using TeamSync.Domain.Entities;
 
 namespace TeamSync.Application.Interfaces.Repositories
 {
-	public interface IUserRepository
+	public interface IUserRepository : IRepository<User>
 	{
-		Task<List<User>> GetAllAsync();
 		Task<User?> GetByEmailAsync(string email);
-		Task AddAsync(User user);
-		Task DeleteAsync(string email);
 	}
 }
