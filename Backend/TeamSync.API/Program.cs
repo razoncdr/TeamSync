@@ -1,10 +1,13 @@
+﻿using DotNetEnv;
 using TeamSync.Application.Interfaces.Services;
 using TeamSync.Application.Services;
 using TeamSync.Infrastructure;
 using TeamSync.Infrastructure.Settings;
 
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
+//Console.WriteLine(builder.Configuration["MongoDBSettings:ConnectionString"]);
 
 // Add services to the container.
 builder.Services.AddControllers();
