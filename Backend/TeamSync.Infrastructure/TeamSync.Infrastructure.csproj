@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AuthApp.Application\TeamSync.Application.csproj" />
+    <ProjectReference Include="..\TeamSync.Application\TeamSync.Application.csproj" />
   </ItemGroup>
 
 </Project>

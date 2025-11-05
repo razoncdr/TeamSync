@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AuthApp.Domain\TeamSync.Domain.csproj" />
+    <ProjectReference Include="..\TeamSync.Domain\TeamSync.Domain.csproj" />
   </ItemGroup>
 
 </Project>
