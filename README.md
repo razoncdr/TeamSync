@@ -1,1 +1,1 @@
-# AuthApp
+# TeamSync
