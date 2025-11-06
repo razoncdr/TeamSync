@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TeamSync.Application.DTOs;
 using TeamSync.Application.Interfaces.Services;
 
-namespace AuthApp.API.Controllers
+namespace TeamSync.API.Controllers
 {
 	[ApiController]
 	[Route("api/[controller]")]
