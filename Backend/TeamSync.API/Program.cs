@@ -1,13 +1,15 @@
-﻿using TeamSync.Infrastructure.Settings;
-using DotNetEnv;
+﻿using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
+using TeamSync.Application.Interfaces.Repositories;
 using TeamSync.Application.Interfaces.Services;
 using TeamSync.Application.Services;
 using TeamSync.Infrastructure;
+using TeamSync.Infrastructure.Repositories;
 using TeamSync.Infrastructure.Services;
-using Microsoft.OpenApi.Models;
+using TeamSync.Infrastructure.Settings;
 
 Env.Load();
 
@@ -38,6 +40,8 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // Dependency Injection for services
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+builder.Services.AddScoped<IProjectService, ProjectService>();
 
 // JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JWTSettings").Get<JWTSettings>();
