@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
 
 @Component({
@@ -15,13 +15,14 @@ export class Register {
   email = '';
   password = '';
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   onSubmit() {
     const dto = { name: this.name, email: this.email, password: this.password };
     this.authService.register(dto).subscribe({
       next: (res) => {
         console.log('Registered user:', res);
+        this.router.navigate(['/login']);
         alert('Registration successful!');
       },
       error: (err) => {

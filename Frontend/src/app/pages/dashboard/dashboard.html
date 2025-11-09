@@ -1,0 +1,13 @@
+<h2>Welcome to your Dashboard</h2>
+
+<div class="create-section">
+  <input [(ngModel)]="newProjectName" placeholder="Project name" />
+  <button (click)="createProject()">Create</button>
+</div>
+
+<ul>
+  <li *ngFor="let project of projects">
+    {{ project.name }}
+    <button (click)="deleteProject(project.id)">Delete</button>
+  </li>
+</ul>

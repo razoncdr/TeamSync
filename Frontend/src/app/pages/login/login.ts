@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
 
 @Component({
@@ -13,7 +13,7 @@ import { AuthService } from '../../services/auth';
 export class Login {
   email = '';
   password = '';
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   onSubmit() {
     const dto = { email: this.email, password: this.password };
@@ -21,6 +21,7 @@ export class Login {
       next: (res: any) => {
         console.log('Login successful:', res);
         localStorage.setItem('token', res.token); // store JWT
+        this.router.navigate(['/dashboard']);
         alert('Login successful!');
       },
       error: (err) => {
