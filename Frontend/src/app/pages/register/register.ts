@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-register',
@@ -14,8 +15,19 @@ export class Register {
   email = '';
   password = '';
 
+  constructor(private authService: AuthService) {}
+
   onSubmit() {
-    console.log('Register data:', { name: this.name, email: this.email, password: this.password });
-    alert('Register data logged to console');
+    const dto = { name: this.name, email: this.email, password: this.password };
+    this.authService.register(dto).subscribe({
+      next: (res) => {
+        console.log('Registered user:', res);
+        alert('Registration successful!');
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Registration failed.');
+      }
+    });
   }
 }

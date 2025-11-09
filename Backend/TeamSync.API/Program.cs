@@ -13,6 +13,16 @@ Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 // Configure settings
 builder.Services.Configure<JWTSettings>(
 	builder.Configuration.GetSection("JWTSettings")
@@ -81,6 +91,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+app.UseCors();
+
 
 // Swagger in Development
 if (app.Environment.IsDevelopment())

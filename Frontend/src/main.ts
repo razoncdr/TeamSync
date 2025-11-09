@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app/app.routes';
 import { Component } from '@angular/core';
 import { RouterOutlet, RouterLink } from '@angular/router';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
@@ -14,5 +15,7 @@ import { RouterOutlet, RouterLink } from '@angular/router';
 class AppRoot {}
 
 bootstrapApplication(AppRoot, {
-  providers: [provideRouter(routes)]
+  providers: [
+    provideHttpClient(withFetch()),
+    provideRouter(routes)]
 }).catch(err => console.error(err));
