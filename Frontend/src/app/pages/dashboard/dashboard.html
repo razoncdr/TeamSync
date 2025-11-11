@@ -1,13 +1,43 @@
-<h2>Welcome to your Dashboard</h2>
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h2>Your Projects</h2>
+    <button class="create-btn" (click)="openModal()">+ New Project</button>
+  </div>
 
-<div class="create-section">
-  <input [(ngModel)]="newProjectName" placeholder="Project name" />
-  <button (click)="createProject()">Create</button>
+  <div class="project-grid">
+    <div *ngFor="let project of projects" class="project-card">
+      <h3 (click)="goToProject(project.id)" class="project-name">
+        {{ project.name }}
+      </h3>
+      <p class="project-desc">{{ project.description || 'No description' }}</p>
+
+      <div class="actions">
+        <button (click)="openModal(project)">✏️ Edit</button>
+        <button (click)="manageMembers(project.id)">👥 Members</button>
+        <button class="delete" (click)="confirmDelete(project.id)">🗑️ Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" *ngIf="showModal">
+    <div class="modal">
+      <h3>{{ editingProject ? 'Edit Project' : 'Create Project' }}</h3>
+
+      <form (ngSubmit)="saveProject()">
+        <input [(ngModel)]="projectForm.name" name="name" placeholder="Project name" required />
+        <textarea
+          [(ngModel)]="projectForm.description"
+          name="description"
+          placeholder="Description"
+          rows="3"
+        ></textarea>
+
+        <div class="modal-actions">
+          <button type="submit">{{ editingProject ? 'Update' : 'Create' }}</button>
+          <button type="button" class="cancel" (click)="closeModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
-
-<ul>
-  <li *ngFor="let project of projects">
-    {{ project.name }}
-    <button (click)="deleteProject(project.id)">Delete</button>
-  </li>
-</ul>
