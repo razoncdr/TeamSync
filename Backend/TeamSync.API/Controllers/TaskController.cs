@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 using TeamSync.Application.DTOs;
 using TeamSync.Application.Interfaces.Services;
 
@@ -44,13 +45,6 @@ namespace TeamSync.API.Controllers
 		[HttpPut("{id}")]
 		public async Task<IActionResult> Update(string id, [FromBody] TaskDto dto)
 		{
-			//Console.WriteLine($"TaskDto: {System.Text.Json.JsonSerializer.Serialize(dto)}");
-
-			//Console.WriteLine("TaskDto:\n" +
-			//	System.Text.Json.JsonSerializer.Serialize(dto, new JsonSerializerOptions
-			//	{
-			//		WriteIndented = true
-			//	}));
 			dto.Id = id;
 			var updated = await _taskService.UpdateTaskAsync(dto);
 			return Ok(updated);

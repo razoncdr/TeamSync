@@ -23,7 +23,7 @@ namespace TeamSync.Application.Services
 		{
 			var task = new TaskItem
 			{
-				ProjectId = dto.Id,
+				ProjectId = dto.ProjectId,
 				Title = dto.Title,
 				Description = dto.Description,
 				DueDate = dto.DueDate,
