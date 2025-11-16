@@ -31,10 +31,5 @@ namespace TeamSync.API.Controllers
 
 			return Ok(new { success = true, token });
 		}
-
-		[Authorize]
-		[HttpGet("profile")]
-		public IActionResult GetProfile() => Ok("This is protected data");
-
 	}
 }

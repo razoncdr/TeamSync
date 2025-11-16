@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using System.Text.Json.Serialization;
 using TeamSync.Application.Interfaces.Repositories;
 using TeamSync.Application.Interfaces.Services;
 using TeamSync.Application.Services;
@@ -25,6 +26,13 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddControllers()
+	.AddJsonOptions(options =>
+	{
+		options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+	});
+
+
 // Configure settings
 builder.Services.Configure<JWTSettings>(
 	builder.Configuration.GetSection("JWTSettings")
@@ -40,8 +48,11 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // Dependency Injection for services
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<ITaskService, TaskService>();
+
+builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+builder.Services.AddScoped<ITaskRepository, TaskItemRepository>();
 
 // JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JWTSettings").Get<JWTSettings>();

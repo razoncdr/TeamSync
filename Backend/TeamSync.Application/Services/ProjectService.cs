@@ -18,6 +18,12 @@ namespace TeamSync.Application.Services
 			return await _projectRepository.GetAllByUserIdAsync(userId);
 		}
 
+		public async Task<Project> GetProjectByIdAsync(string projectId)
+		{
+			var project = await _projectRepository.GetByIdAsync(projectId);
+			if (project == null) throw new Exception("Project Not Found");
+			return project;
+		}
 		public async Task<Project> CreateProjectAsync(string userId, string name, string description)
 		{
 			var project = new Project
