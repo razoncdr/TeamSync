@@ -6,9 +6,16 @@
       <!-- Name -->
       <div class="input-group">
         <label>Name</label>
-        <input [(ngModel)]="name" name="name" type="text" required #nameField="ngModel" />
+        <input
+          [(ngModel)]="name"
+          name="name"
+          type="text"
+          required
+          minlength="3"
+          #nameField="ngModel"
+        />
         <p class="error" *ngIf="nameField.invalid && (nameField.touched || submitted)">
-          Name is required
+          Name is required and must be at least 3 characters
         </p>
       </div>
 
