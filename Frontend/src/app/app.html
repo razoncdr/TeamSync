@@ -1,7 +1,19 @@
-<nav style="padding:12px; border-bottom:1px solid #eee;">
-  <a routerLink="/login" style="margin-right:12px">Login</a>
-  <a routerLink="/register">Register</a>
+<nav class="navbar">
+  <div class="nav-left">
+    <a routerLink="/" class="brand">TeamSync</a>
+  </div>
+
+  <div class="nav-right">
+    <!-- Show when NOT logged in -->
+    <a routerLink="/login" *ngIf="!auth.isLoggedIn()" class="nav-btn">Login</a>
+    <a routerLink="/register" *ngIf="!auth.isLoggedIn()" class="nav-btn">Register</a>
+
+    <!-- Show when logged in -->
+    <a routerLink="/dashboard" *ngIf="auth.isLoggedIn()" class="nav-btn">Dashboard</a>
+    <a (click)="logout()" *ngIf="auth.isLoggedIn()" class="nav-btn logout">Logout</a>
+  </div>
 </nav>
-<main style="padding:16px;">
+
+<main class="main-container">
   <router-outlet></router-outlet>
 </main>

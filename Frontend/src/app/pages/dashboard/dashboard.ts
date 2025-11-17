@@ -73,6 +73,6 @@ export class Dashboard implements OnInit {
   }
 
   manageMembers(id: string) {
-    alert(`Members management for project ${id} will be added later`);
+    alert(`Members management will be added later`);
   }
 }
