@@ -9,7 +9,7 @@ import { CommonModule, NgIf } from '@angular/common';
   standalone: true,
   imports: [FormsModule, RouterLink, CommonModule, NgIf],
   templateUrl: './register.html',
-  styleUrls: ['./register.css']
+  styleUrls: ['./register.css'],
 })
 export class Register {
   name = '';
@@ -36,22 +36,21 @@ export class Register {
       return; // Stop submit if validation fails
     }
 
-    const dto = { 
-      name: this.name, 
-      email: this.email, 
-      password: this.password 
+    const dto = {
+      name: this.name,
+      email: this.email,
+      password: this.password,
     };
 
     this.authService.register(dto).subscribe({
       next: (res) => {
-        console.log('Registered user:', res);
-        alert('Registration successful!');
+        alert(res.body.message);
         this.router.navigate(['/login']);
       },
       error: (err) => {
         console.error(err);
-        alert('Registration failed.');
-      }
+        alert(`Registration failed: ${err.error.errors.Name[0]}`);
+      },
     });
   }
 

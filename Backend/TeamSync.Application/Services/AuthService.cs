@@ -17,7 +17,10 @@ namespace TeamSync.Application.Services
 			_userRepository = userRepository;
 			_jwtService = jwtService;
 		}
-
+		public async Task<User?> GetByEmailAsync(string email)
+		{
+			return await _userRepository.GetByEmailAsync(email);
+		}
 		public async Task<User> RegisterAsync(RegisterUserDto dto)
 		{
 			using var hmac = new HMACSHA512();

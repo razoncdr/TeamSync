@@ -1,4 +1,5 @@
 ﻿using TeamSync.Application.DTOs;
+using TeamSync.Application.Interfaces.Repositories;
 using TeamSync.Domain.Entities;
 
 namespace TeamSync.Application.Interfaces.Services
@@ -7,6 +8,8 @@ namespace TeamSync.Application.Interfaces.Services
     {
         Task<User> RegisterAsync(RegisterUserDto dto);
 		Task<string?> LoginAsync(LoginUserDto dto);
+
+		Task<User?> GetByEmailAsync(string email);
 
 	}
 }
