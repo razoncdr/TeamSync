@@ -15,7 +15,7 @@
           email
           #emailField="ngModel"
         />
-        <p class="error" *ngIf="emailField.invalid && emailField.touched || submitted">
+        <p class="error" *ngIf="emailField.invalid && (emailField.touched || submitted)">
           Valid email is required
         </p>
       </div>
@@ -35,7 +35,7 @@
             {{ showPassword ? '🙈' : '👁️' }}
           </span>
         </div>
-        <p class="error" *ngIf="passwordField.invalid && passwordField.touched || submitted">
+        <p class="error" *ngIf="passwordField.invalid && (passwordField.touched || submitted)">
           Password is required
         </p>
       </div>

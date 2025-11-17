@@ -7,7 +7,7 @@
       <div class="input-group">
         <label>Name</label>
         <input [(ngModel)]="name" name="name" type="text" required #nameField="ngModel" />
-        <p class="error" *ngIf="(nameField.invalid && nameField.touched) || submitted">
+        <p class="error" *ngIf="nameField.invalid && (nameField.touched || submitted)">
           Name is required
         </p>
       </div>
@@ -16,7 +16,7 @@
       <div class="input-group">
         <label>Email</label>
         <input [(ngModel)]="email" name="email" type="email" required email #emailField="ngModel" />
-        <p class="error" *ngIf="(emailField.invalid && emailField.touched) || submitted">
+        <p class="error" *ngIf="emailField.invalid && (emailField.touched || submitted)">
           Valid email is required
         </p>
       </div>
@@ -37,7 +37,7 @@
             {{ showPassword ? '🙈' : '👁️' }}
           </span>
         </div>
-        <p class="error" *ngIf="(passwordField.invalid && passwordField.touched) || submitted">
+        <p class="error" *ngIf="passwordField.invalid && (passwordField.touched || submitted)">
           Password must be at least 6 characters
         </p>
       </div>
@@ -60,7 +60,7 @@
 
         <p
           class="error"
-          *ngIf="(confirmPassword !== password && confirmField.touched) || submitted"
+          *ngIf="confirmPassword !== password && (confirmField.touched || submitted)"
         >
           Passwords do not match
         </p>
