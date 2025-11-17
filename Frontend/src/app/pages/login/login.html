@@ -1,37 +1,50 @@
-<div class="form-card">
-  <h2>Login</h2>
+<div class="auth-container">
+  <div class="form-card">
+    <h2>Login</h2>
 
-  <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)">
-    <!-- Email -->
-    <input
-      type="email"
-      name="email"
-      [(ngModel)]="email"
-      placeholder="Email"
-      required
-      email
-      #emailCtrl="ngModel"
-    />
-    <div class="error" *ngIf="emailCtrl.invalid && emailCtrl.touched">
-      Enter a valid email address
-    </div>
+    <form (ngSubmit)="onSubmit(loginForm)" #loginForm="ngForm">
 
-    <!-- Password -->
-    <input
-      type="password"
-      name="password"
-      [(ngModel)]="password"
-      placeholder="Password"
-      required
-      minlength="6"
-      #passCtrl="ngModel"
-    />
-    <div class="error" *ngIf="passCtrl.invalid && passCtrl.touched">
-      Password must be at least 6 characters
-    </div>
+      <!-- Email -->
+      <div class="input-group">
+        <label>Email</label>
+        <input
+          [(ngModel)]="email"
+          name="email"
+          type="email"
+          required
+          email
+          #emailField="ngModel"
+        />
+        <p class="error" *ngIf="emailField.invalid && emailField.touched || submitted">
+          Valid email is required
+        </p>
+      </div>
 
-    <button type="submit" [disabled]="loginForm.invalid">Login</button>
-  </form>
+      <!-- Password -->
+      <div class="input-group">
+        <label>Password</label>
+        <div class="password-wrapper">
+          <input
+            [(ngModel)]="password"
+            name="password"
+            [type]="showPassword ? 'text' : 'password'"
+            required
+            #passwordField="ngModel"
+          />
+          <span class="toggle" (click)="showPassword = !showPassword">
+            {{ showPassword ? '🙈' : '👁️' }}
+          </span>
+        </div>
+        <p class="error" *ngIf="passwordField.invalid && passwordField.touched || submitted">
+          Password is required
+        </p>
+      </div>
 
-  <p style="margin-top: 12px">Don't have an account? <a routerLink="/register">Register</a></p>
+      <button type="submit">Login</button>
+    </form>
+
+    <p class="redirect">
+      Don't have an account? <a routerLink="/register">Register</a>
+    </p>
+  </div>
 </div>

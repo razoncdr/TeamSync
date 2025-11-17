@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { CommonModule, NgIf } from '@angular/common';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
+import { CommonModule, NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-register',
@@ -15,27 +15,51 @@ export class Register {
   name = '';
   email = '';
   password = '';
+  confirmPassword = '';
+
+  showPassword = false;
+  showConfirmPassword = false;
+
+  // Validation flags
+  submitted = false;
 
   constructor(private authService: AuthService, private router: Router) {}
-  onSubmit(form: any) {
-  if (form.invalid) {
-    alert("Please correct the errors.");
-    return;
+
+  passwordsMatch(): boolean {
+    return this.password === this.confirmPassword;
   }
 
-  const dto = {
-    name: this.name,
-    email: this.email,
-    password: this.password,
-  };
+  onSubmit(form: NgForm) {
+    this.submitted = true;
 
-  this.authService.register(dto).subscribe({
-    next: (res) => {
-      this.router.navigate(['/login']);
-    },
-    error: (err) => {
-      alert(err.error?.message || "Registration failed.");
+    if (form.invalid || !this.passwordsMatch()) {
+      return; // Stop submit if validation fails
     }
-  });
-}
+
+    const dto = { 
+      name: this.name, 
+      email: this.email, 
+      password: this.password 
+    };
+
+    this.authService.register(dto).subscribe({
+      next: (res) => {
+        console.log('Registered user:', res);
+        alert('Registration successful!');
+        this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Registration failed.');
+      }
+    });
+  }
+
+  togglePassword() {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirmPassword() {
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
 }

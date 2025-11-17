@@ -15,8 +15,9 @@ import { CommonModule, NgIf } from '@angular/common';
 export class Login {
   email = '';
   password = '';
-  loading = false;
-  errorMessage = '';
+
+  showPassword = false;
+  submitted = false;
 
   constructor(
     private authService: AuthService,
@@ -25,26 +26,25 @@ export class Login {
   ) {}
 
   onSubmit(form: NgForm) {
-    // Prevent accidental submission
-    if (form.invalid || this.loading) {
-      return;
-    }
+    this.submitted = true;
 
-    this.loading = true;
-    this.errorMessage = '';
+    if (form.invalid) return;
 
     const dto = { email: this.email, password: this.password };
 
     this.authService.login(dto).subscribe({
       next: (res: any) => {
-        this.authState.login(res.token); // updates signal + stores token
+        this.authState.login(res.token);
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         console.error(err);
-        this.errorMessage = err.error?.message || 'Invalid email or password';
-        this.loading = false;
+        alert('Invalid credentials.');
       }
     });
+  }
+
+  togglePassword() {
+    this.showPassword = !this.showPassword;
   }
 }
