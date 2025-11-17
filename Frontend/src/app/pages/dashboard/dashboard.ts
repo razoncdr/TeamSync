@@ -32,8 +32,8 @@ export class Dashboard implements OnInit {
   }
 
   goToProject(id: string) {
-    this.router.navigate(['/project', id, 'dashboard']);
-  }
+  this.router.navigate(['/project', id]);
+}
 
   openModal(project: any = null) {
     this.editingProject = project;

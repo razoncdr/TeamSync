@@ -30,6 +30,13 @@ namespace TeamSync.API.Controllers
 			return Ok(projects);
 		}
 
+		[HttpGet("{id}")]
+		public async Task<IActionResult> GetProjectById(string id)
+		{
+			var project = await _projectService.GetProjectByIdAsync(id);
+			return Ok(project);
+		}
+
 		[HttpPost]
 		public async Task<IActionResult> CreateProject([FromBody] ProjectDto dto)
 		{

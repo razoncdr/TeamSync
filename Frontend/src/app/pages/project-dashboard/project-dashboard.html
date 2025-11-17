@@ -1,0 +1,86 @@
+<div class="project-dashboard-container">
+  <div class="header">
+    <h2>{{ projectName || 'Project Dashboard' }}</h2>
+    <button class="add-btn" (click)="openModal()">+ Add Task</button>
+  </div>
+
+  <!-- Task Table -->
+  <table class="task-table" *ngIf="tasks.length > 0; else emptyState">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Due Date</th>
+        <th>Assigned To</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let task of tasks">
+        <td>{{ task.title }}</td>
+        <td>
+          <span [class]="'status ' + task.status">
+            {{ task.status }}
+          </span>
+        </td>
+        <td>{{ task.dueDate | date : 'mediumDate' }}</td>
+        <td>
+          <span *ngFor="let member of task.assignedMembers" class="member">
+            {{ member.name }}
+          </span>
+        </td>
+        <td>
+          <button (click)="openModal(task)">✏️ Edit</button>
+          <button class="delete" (click)="confirmDelete(task.id)">🗑️ Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ng-template #emptyState>
+    <p class="empty">No tasks yet. Click “+ Add Task” to create one.</p>
+  </ng-template>
+
+  <!-- Task Modal -->
+  <div class="modal-backdrop" *ngIf="showModal">
+    <div class="modal">
+      <h3>{{ editingTask ? 'Edit Task' : 'Create Task' }}</h3>
+
+      <form (ngSubmit)="saveTask()">
+        <input [(ngModel)]="taskForm.title" name="title" placeholder="Task title" required />
+
+        <textarea
+          [(ngModel)]="taskForm.description"
+          name="description"
+          placeholder="Description"
+          rows="3"
+        ></textarea>
+
+        <label>Due Date:</label>
+        <input type="date" [(ngModel)]="taskForm.dueDate" name="dueDate" required />
+
+        <label>Status:</label>
+        <select [(ngModel)]="taskForm.status" name="status" required>
+          <option value="Todo">Todo</option>
+          <option value="InProgress">In Progress</option>
+          <option value="Completed">Completed</option>
+          <option value="Paused">Paused</option>
+        </select>
+
+        <label>Assigned Members:</label>
+        <select multiple [(ngModel)]="taskForm.assignedMemberIds" name="assignedMemberIds">
+          <option *ngFor="let member of projectMembers" [value]="member.id">
+            {{ member.name }}
+          </option>
+        </select>
+
+        <div class="modal-actions">
+          <button type="submit">
+            {{ editingTask ? 'Update' : 'Create' }}
+          </button>
+          <button type="button" class="cancel" (click)="closeModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
