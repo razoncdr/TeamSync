@@ -49,7 +49,13 @@ export class Register {
       },
       error: (err) => {
         console.error(err);
-        alert(`Registration failed: ${err.error.errors.Name[0]}`);
+        if (err.error.message) alert(`Registration failed: ${err.error.message}`);
+        else
+          alert(
+            `Registration failed: ${
+              err.error.errors.Name[0] || err.error.errors.Email[0] || err.error.errors.Password[0]
+            }`
+          );
       },
     });
   }
