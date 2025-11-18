@@ -10,7 +10,7 @@ import { CommonModule, NgIf } from '@angular/common';
   standalone: true,
   imports: [FormsModule, RouterLink, CommonModule, NgIf],
   templateUrl: './login.html',
-  styleUrls: ['./login.css']
+  styleUrls: ['./login.css'],
 })
 export class Login {
   email = '';
@@ -34,13 +34,14 @@ export class Login {
 
     this.authService.login(dto).subscribe({
       next: (res: any) => {
-        this.authState.login(res.token);
+        console.log(res);
+        this.authState.login(res.body.token);
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         console.error(err);
         alert('Invalid credentials.');
-      }
+      },
     });
   }
 

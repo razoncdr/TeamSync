@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using TeamSync.Application.Common.Exceptions;
 using TeamSync.Application.DTOs;
 using TeamSync.Application.Interfaces.Repositories;
 using TeamSync.Application.Interfaces.Services;
@@ -17,12 +18,18 @@ namespace TeamSync.Application.Services
 			_userRepository = userRepository;
 			_jwtService = jwtService;
 		}
+
 		public async Task<User?> GetByEmailAsync(string email)
 		{
 			return await _userRepository.GetByEmailAsync(email);
 		}
+
 		public async Task<User> RegisterAsync(RegisterUserDto dto)
 		{
+			var existing = await _userRepository.GetByEmailAsync(dto.Email);
+			if (existing != null)
+				throw new ConflictException("Email already in use.");
+
 			using var hmac = new HMACSHA512();
 
 			var user = new User
@@ -37,16 +44,17 @@ namespace TeamSync.Application.Services
 			return user;
 		}
 
-		public async Task<string?> LoginAsync(LoginUserDto dto)
+		public async Task<string> LoginAsync(LoginUserDto dto)
 		{
 			var user = await _userRepository.GetByEmailAsync(dto.Email);
-			if (user == null) return null;
+			if (user == null)
+				throw new UnauthorizedException("Invalid credentials.");
 
 			using var hmac = new HMACSHA512(user.PasswordSalt);
 			var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(dto.Password));
 
 			if (!computedHash.SequenceEqual(user.PasswordHash))
-				return null;
+				throw new UnauthorizedException("Invalid credentials.");
 
 			return _jwtService.GenerateToken(user);
 		}
