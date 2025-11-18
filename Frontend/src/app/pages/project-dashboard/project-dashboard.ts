@@ -10,7 +10,7 @@ import { ProjectService } from '../../services/project';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './project-dashboard.html',
-  styleUrl: './project-dashboard.css'
+  styleUrl: './project-dashboard.css',
 })
 export class ProjectDashboard implements OnInit {
   projectId!: string;
@@ -44,8 +44,8 @@ export class ProjectDashboard implements OnInit {
   loadProject() {
     this.projectService.getProjectById(this.projectId).subscribe({
       next: (res) => {
-        this.projectName = res.name;
-        this.projectMembers = res.members || [];
+        this.projectName = res.data.name;
+        this.projectMembers = res.data.members || [];
       },
       error: (err) => console.error('Failed to load project', err),
     });
@@ -59,7 +59,6 @@ export class ProjectDashboard implements OnInit {
   }
 
   openModal(task: any = null) {
-    console.log("Opening modal for task: ", task);
     this.editingTask = task;
     this.taskForm = task
       ? {
@@ -89,8 +88,6 @@ export class ProjectDashboard implements OnInit {
       ...this.taskForm,
       projectId: this.projectId,
     };
-    console.log("Payload is: ", payload);
-    console.log("Editing Task is: ", this.editingTask);
 
     const action = this.editingTask
       ? this.taskService.updateTask(this.editingTask.id, payload)

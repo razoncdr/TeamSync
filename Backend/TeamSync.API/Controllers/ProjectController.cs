@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TeamSync.Application.Interfaces.Services;
+using TeamSync.Application.DTOs.Project;
 
 namespace TeamSync.API.Controllers
 {
@@ -17,52 +18,43 @@ namespace TeamSync.API.Controllers
 			_projectService = projectService;
 		}
 
-		private string GetUserId() =>
-			User.FindFirstValue(ClaimTypes.NameIdentifier) ??
-			User.FindFirstValue(ClaimTypes.Name) ??
-			throw new Exception("User not found in token");
+		private string UserId =>
+			User.FindFirstValue(ClaimTypes.NameIdentifier)
+			?? throw new UnauthorizedAccessException("User not found in token.");
 
 		[HttpGet]
 		public async Task<IActionResult> GetProjects()
 		{
-			var userId = GetUserId();
-			var projects = await _projectService.GetUserProjectsAsync(userId);
-			return Ok(projects);
+			var projects = await _projectService.GetUserProjectsAsync(UserId);
+			return Ok(new { success = true, data = projects });
 		}
 
 		[HttpGet("{id}")]
-		public async Task<IActionResult> GetProjectById(string id)
+		public async Task<IActionResult> GetById(string id)
 		{
 			var project = await _projectService.GetProjectByIdAsync(id);
-			return Ok(project);
+			return Ok(new { success = true, data = project });
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> CreateProject([FromBody] ProjectDto dto)
+		public async Task<IActionResult> Create([FromBody] CreateProjectDto dto)
 		{
-			var userId = GetUserId();
-			var project = await _projectService.CreateProjectAsync(userId, dto.Name, dto.Description);
-			return Ok(project);
+			var created = await _projectService.CreateProjectAsync(UserId, dto);
+			return Ok(new { success = true, message = "Project created", data = created });
 		}
 
 		[HttpPut("{id}")]
-		public async Task<IActionResult> UpdateProject(string id, [FromBody] ProjectDto dto)
+		public async Task<IActionResult> Update(string id, [FromBody] UpdateProjectDto dto)
 		{
-			await _projectService.UpdateProjectAsync(id, dto.Name, dto.Description);
-			return Ok(new { success = true });
+			await _projectService.UpdateProjectAsync(id, dto);
+			return Ok(new { success = true, message = "Project updated" });
 		}
 
 		[HttpDelete("{id}")]
-		public async Task<IActionResult> DeleteProject(string id)
+		public async Task<IActionResult> Delete(string id)
 		{
 			await _projectService.DeleteProjectAsync(id);
-			return Ok(new { success = true });
+			return Ok(new { success = true, message = "Project deleted" });
 		}
-	}
-
-	public class ProjectDto
-	{
-		public string Name { get; set; } = string.Empty;
-		public string Description { get; set; } = string.Empty;
 	}
 }

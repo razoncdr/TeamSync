@@ -9,7 +9,7 @@ import { ProjectService } from '../../services/project';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './dashboard.html',
-  styleUrl: './dashboard.css'
+  styleUrl: './dashboard.css',
 })
 export class Dashboard implements OnInit {
   projects: any[] = [];
@@ -26,14 +26,14 @@ export class Dashboard implements OnInit {
 
   loadProjects() {
     this.projectService.getProjects().subscribe({
-      next: (res) => (this.projects = res),
+      next: (res) => (this.projects = res.data || []),
       error: (err) => console.error('Failed to load projects', err),
     });
   }
 
   goToProject(id: string) {
-  this.router.navigate(['/project', id]);
-}
+    this.router.navigate(['/project', id]);
+  }
 
   openModal(project: any = null) {
     this.editingProject = project;

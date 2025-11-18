@@ -1,13 +1,13 @@
-﻿using TeamSync.Domain.Entities;
+﻿using TeamSync.Application.DTOs.Project;
 
 namespace TeamSync.Application.Interfaces.Services
 {
 	public interface IProjectService
 	{
-		Task<List<Project>> GetUserProjectsAsync(string userId);
-		Task<Project> GetProjectByIdAsync(string projectId);
-		Task<Project> CreateProjectAsync(string userId, string name, string description);
-		Task UpdateProjectAsync(string id, string name, string description);
+		Task<List<ProjectResponseDto>> GetUserProjectsAsync(string userId);
+		Task<ProjectResponseDto> GetProjectByIdAsync(string id);
+		Task<ProjectResponseDto> CreateProjectAsync(string userId, CreateProjectDto dto);
+		Task UpdateProjectAsync(string id, UpdateProjectDto dto);
 		Task DeleteProjectAsync(string id);
 	}
 }

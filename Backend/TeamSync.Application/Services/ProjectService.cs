@@ -1,6 +1,8 @@
 ﻿using TeamSync.Application.Interfaces.Repositories;
 using TeamSync.Application.Interfaces.Services;
 using TeamSync.Domain.Entities;
+using TeamSync.Application.Common.Exceptions;
+using TeamSync.Application.DTOs.Project;
 
 namespace TeamSync.Application.Services
 {
@@ -13,44 +15,77 @@ namespace TeamSync.Application.Services
 			_projectRepository = projectRepository;
 		}
 
-		public async Task<List<Project>> GetUserProjectsAsync(string userId)
+		public async Task<List<ProjectResponseDto>> GetUserProjectsAsync(string userId)
 		{
-			return await _projectRepository.GetAllByUserIdAsync(userId);
+			var projects = await _projectRepository.GetAllByUserIdAsync(userId);
+
+			return projects.Select(p => new ProjectResponseDto
+			{
+				Id = p.Id,
+				Name = p.Name,
+				Description = p.Description,
+				OwnerId = p.OwnerId,
+				CreatedAt = p.CreatedAt
+			}).ToList();
 		}
 
-		public async Task<Project> GetProjectByIdAsync(string projectId)
+		public async Task<ProjectResponseDto> GetProjectByIdAsync(string id)
 		{
-			var project = await _projectRepository.GetByIdAsync(projectId);
-			if (project == null) throw new Exception("Project Not Found");
-			return project;
+			var project = await _projectRepository.GetByIdAsync(id)
+				?? throw new NotFoundException("Project not found");
+
+			return new ProjectResponseDto
+			{
+				Id = project.Id,
+				Name = project.Name,
+				Description = project.Description,
+				OwnerId = project.OwnerId,
+				CreatedAt = project.CreatedAt
+			};
 		}
-		public async Task<Project> CreateProjectAsync(string userId, string name, string description)
+
+		public async Task<ProjectResponseDto> CreateProjectAsync(string userId, CreateProjectDto dto)
 		{
+			if (string.IsNullOrWhiteSpace(dto.Name))
+				throw new ValidationException("Project name is required.");
+
 			var project = new Project
 			{
-				Name = name,
-				Description = description,
+				Name = dto.Name,
+				Description = dto.Description,
 				OwnerId = userId,
 				CreatedAt = DateTime.UtcNow
 			};
 
 			await _projectRepository.AddAsync(project);
-			return project;
+
+			return new ProjectResponseDto
+			{
+				Id = project.Id,
+				Name = project.Name,
+				Description = project.Description,
+				OwnerId = project.OwnerId,
+				CreatedAt = project.CreatedAt
+			};
 		}
 
-		public async Task UpdateProjectAsync(string id, string name, string description)
+		public async Task UpdateProjectAsync(string id, UpdateProjectDto dto)
 		{
-			var existing = await _projectRepository.GetByIdAsync(id);
-			if (existing == null) throw new Exception("Project not found");
+			var existing = await _projectRepository.GetByIdAsync(id)
+				?? throw new NotFoundException("Project not found");
 
-			existing.Name = name;
-			existing.Description = description;
+			existing.Name = dto.Name;
+			existing.Description = dto.Description;
 
 			await _projectRepository.UpdateAsync(existing);
 		}
 
 		public async Task DeleteProjectAsync(string id)
 		{
+			bool exists = await _projectRepository.ExistsAsync(id);
+			if (!exists)
+				throw new NotFoundException("Project not found");
+
 			await _projectRepository.DeleteAsync(id);
 		}
 	}
