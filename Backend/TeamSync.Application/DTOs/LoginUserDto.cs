@@ -1,8 +1,14 @@
-﻿namespace TeamSync.Application.DTOs
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace TeamSync.Application.DTOs
 {
 	public class LoginUserDto
 	{
-		public string Email { get; set; } = string.Empty;
-		public string Password { get; set; } = string.Empty;
+		[Required(ErrorMessage = "Email is required")]
+		[EmailAddress(ErrorMessage = "Invalid email address")]
+		public string Email { get; set; }
+
+		[Required(ErrorMessage = "Password is required")]
+		public string Password { get; set; }
 	}
 }
