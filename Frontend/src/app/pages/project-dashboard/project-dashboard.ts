@@ -53,7 +53,7 @@ export class ProjectDashboard implements OnInit {
 
   loadTasks() {
     this.taskService.getTasks(this.projectId).subscribe({
-      next: (res) => (this.tasks = res),
+      next: (res) => (this.tasks = res.data || []),
       error: (err) => console.error('Failed to load tasks', err),
     });
   }
@@ -84,14 +84,9 @@ export class ProjectDashboard implements OnInit {
   }
 
   saveTask() {
-    const payload = {
-      ...this.taskForm,
-      projectId: this.projectId,
-    };
-
     const action = this.editingTask
-      ? this.taskService.updateTask(this.editingTask.id, payload)
-      : this.taskService.createTask(payload);
+      ? this.taskService.updateTask(this.editingTask.id, this.taskForm)
+      : this.taskService.createTask(this.projectId, this.taskForm);
 
     action.subscribe({
       next: () => {

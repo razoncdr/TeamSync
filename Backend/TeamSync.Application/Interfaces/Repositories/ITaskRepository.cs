@@ -4,6 +4,7 @@ namespace TeamSync.Application.Interfaces.Repositories
 {
 	public interface ITaskRepository
 	{
+		Task<bool> ExistsAsync(string id);
 		Task<List<TaskItem>> GetByProjectIdAsync(string projectId);
 		Task<TaskItem?> GetByIdAsync(string id);
 		Task AddAsync(TaskItem task);
