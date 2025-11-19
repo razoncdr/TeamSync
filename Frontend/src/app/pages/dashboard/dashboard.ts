@@ -76,6 +76,6 @@ export class Dashboard implements OnInit {
   }
 
   manageMembers(id: string) {
-    alert(`Members management will be added later`);
+    this.router.navigate([`/projects/${id}/members`]);
   }
 }

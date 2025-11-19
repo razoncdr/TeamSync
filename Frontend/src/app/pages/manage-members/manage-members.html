@@ -1,0 +1,53 @@
+<div class="members-container">
+  <h2>Project Members</h2>
+
+  <!-- <button class="back-btn" routerLink="/dashboard">⬅ Back</button> -->
+
+  <!-- Member List -->
+  <div *ngIf="loading">Loading members...</div>
+
+  <table *ngIf="!loading">
+    <tr>
+      <th>User ID</th>
+      <th>Role</th>
+      <th>Joined</th>
+      <th>Action</th>
+    </tr>
+
+    <tr *ngFor="let m of members">
+      <td>{{ m.userId }}</td>
+      <td>
+        <span
+          [ngClass]="{
+            'badge-owner': m.role === 'Owner',
+            'badge-admin': m.role === 'Admin',
+            'badge-editor': m.role === 'Editor',
+            'badge-viewer': m.role === 'Viewer'
+          }"
+          >{{ m.role }}</span
+        >
+      </td>
+      <td>{{ m.joinedAt | date }}</td>
+      <td>
+        <button class="remove-btn" (click)="removeMember(m.userId)">Remove</button>
+      </td>
+    </tr>
+  </table>
+
+  <hr />
+
+  <!-- Invite Form -->
+  <h3>Invite New Member</h3>
+
+  <input type="email" placeholder="Email address" [(ngModel)]="inviteEmail" />
+
+  <select [(ngModel)]="inviteRole">
+    <option value="Viewer">Viewer</option>
+    <option value="Editor">Editor</option>
+    <option value="Admin">Admin</option>
+  </select>
+
+  <button (click)="invite()" [disabled]="inviting">
+    {{ inviting ? 'Sending...' : 'Send Invite' }}
+  </button>
+</div>
