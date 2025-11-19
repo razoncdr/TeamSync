@@ -1,4 +1,5 @@
-﻿using TeamSync.Application.DTOs;
+﻿using TeamSync.Application.Common.Exceptions;
+using TeamSync.Application.DTOs.Task;
 using TeamSync.Application.Interfaces.Repositories;
 using TeamSync.Application.Interfaces.Services;
 using TeamSync.Domain.Entities;
@@ -19,27 +20,28 @@ namespace TeamSync.Application.Services
 			return await _taskRepository.GetByProjectIdAsync(projectId);
 		}
 
-		public async Task<TaskItem> CreateTaskAsync(TaskDto dto)
+		public async Task<TaskItem> CreateTaskAsync(string projectId, CreateTaskDto dto)
 		{
 			var task = new TaskItem
 			{
-				ProjectId = dto.ProjectId,
+				ProjectId = projectId,
 				Title = dto.Title,
 				Description = dto.Description,
 				DueDate = dto.DueDate,
 				AssignedMemberIds = dto.AssignedMemberIds ?? new List<string>(),
 				Status = dto.Status,
-				CreatedAt = DateTime.UtcNow
+				CreatedAt = DateTime.UtcNow,
+				UpdatedAt = DateTime.UtcNow
 			};
 
 			await _taskRepository.AddAsync(task);
 			return task;
 		}
 
-		public async Task<TaskItem> UpdateTaskAsync(TaskDto dto)
+		public async Task<TaskItem> UpdateTaskAsync(string id, UpdateTaskDto dto)
 		{
-			var existing = await _taskRepository.GetByIdAsync(dto.Id);
-			if (existing == null) throw new Exception("Task not found");
+			var existing = await _taskRepository.GetByIdAsync(id)
+				?? throw new NotFoundException("Task not found");
 
 			existing.Title = dto.Title;
 			existing.Description = dto.Description;
@@ -54,12 +56,17 @@ namespace TeamSync.Application.Services
 
 		public async Task DeleteTaskAsync(string id)
 		{
+			bool exists = await _taskRepository.ExistsAsync(id);
+			if (!exists)
+				throw new NotFoundException("Task not found");
 			await _taskRepository.DeleteAsync(id);
 		}
 
 		public async Task<TaskItem?> GetByIdAsync(string id)
 		{
-			return await _taskRepository.GetByIdAsync(id);
+			var task = await _taskRepository.GetByIdAsync(id)??
+				throw new NotFoundException("Task not found");
+			return task;
 		}
 	}
 }

@@ -13,7 +13,11 @@ namespace TeamSync.Infrastructure.Repositories
 		{
 			_projects = database.GetCollection<Project>("Projects");
 		}
-
+		public async Task<bool> ExistsAsync(string id)
+		{
+			var filter = Builders<Project>.Filter.Eq(p => p.Id, id);
+			return await _projects.Find(filter).AnyAsync();
+		}
 		public async Task<List<Project>> GetAllByUserIdAsync(string userId) =>
 			await _projects.Find(p => p.OwnerId == userId).ToListAsync();
 
