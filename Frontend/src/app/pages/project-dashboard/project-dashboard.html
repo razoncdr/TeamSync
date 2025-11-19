@@ -46,28 +46,65 @@
     <div class="modal">
       <h3>{{ editingTask ? 'Edit Task' : 'Create Task' }}</h3>
 
-      <form (ngSubmit)="saveTask()">
-        <input [(ngModel)]="taskForm.title" name="title" placeholder="Task title" required />
+      <form #taskFormRef="ngForm" (ngSubmit)="saveTask()" novalidate>
+        <!-- TITLE -->
+        <label> Task Title <span class="required">*</span> </label>
+        <input
+          [(ngModel)]="taskForm.title"
+          name="title"
+          required
+          maxlength="100"
+          #titleRef="ngModel"
+          placeholder="Task title"
+        />
 
+        <div class="error" *ngIf="titleRef.invalid && titleRef.touched">
+          <small *ngIf="titleRef.errors?.['required']">Title is required</small>
+          <small *ngIf="titleRef.errors?.['maxlength']">Title must be ≤ 100 characters</small>
+        </div>
+
+        <!-- DESCRIPTION -->
+        <label>Description</label>
         <textarea
           [(ngModel)]="taskForm.description"
           name="description"
+          maxlength="1000"
+          #descRef="ngModel"
           placeholder="Description"
           rows="3"
         ></textarea>
 
-        <label>Due Date:</label>
-        <input type="date" [(ngModel)]="taskForm.dueDate" name="dueDate" required />
+        <div class="error" *ngIf="descRef.invalid && descRef.touched">
+          <small *ngIf="descRef.errors?.['maxlength']">
+            Description must be ≤ 1000 characters
+          </small>
+        </div>
 
-        <label>Status:</label>
-        <select [(ngModel)]="taskForm.status" name="status" required>
+        <!-- DUE DATE -->
+        <label> Due Date <span class="required">*</span> </label>
+        <input
+          type="date"
+          [(ngModel)]="taskForm.dueDate"
+          name="dueDate"
+          required
+          #dueRef="ngModel"
+        />
+
+        <div class="error" *ngIf="dueRef.invalid && dueRef.touched">
+          <small *ngIf="dueRef.errors?.['required']">Due date is required</small>
+        </div>
+
+        <!-- STATUS -->
+        <label> Status </label>
+        <select [(ngModel)]="taskForm.status" name="status" required #statusRef="ngModel">
           <option value="Todo">Todo</option>
           <option value="InProgress">In Progress</option>
           <option value="Completed">Completed</option>
           <option value="Paused">Paused</option>
         </select>
 
-        <label>Assigned Members:</label>
+        <!-- ASSIGNED MEMBERS -->
+        <label>Assigned Members</label>
         <select multiple [(ngModel)]="taskForm.assignedMemberIds" name="assignedMemberIds">
           <option *ngFor="let member of projectMembers" [value]="member.id">
             {{ member.name }}
@@ -75,7 +112,7 @@
         </select>
 
         <div class="modal-actions">
-          <button type="submit">
+          <button type="submit" [disabled]="taskFormRef.invalid">
             {{ editingTask ? 'Update' : 'Create' }}
           </button>
           <button type="button" class="cancel" (click)="closeModal()">Cancel</button>
