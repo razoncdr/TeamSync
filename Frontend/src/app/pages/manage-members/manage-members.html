@@ -78,12 +78,19 @@
         >{{ inv.role }}</span
       >
     </td>
-    <td>{{ inv.status }}</td>
-    <td>{{ inv.createdAt | date:'short' }}</td>
+    <td>
+      <span
+        [ngClass]="{
+          'badge-pending': inv.status === 'Pending',
+          'badge-accepted': inv.status === 'Accepted',
+          'badge-rejected': inv.status === 'Rejected'
+        }"
+      >
+        {{ inv.status }}
+      </span>
+    </td>
+    <td>{{ inv.createdAt | date : 'short' }}</td>
   </tr>
 </table>
 
-<div *ngIf="!loadingInvitations && invitations.length === 0">
-  No pending invitations.
-</div>
-
+<div *ngIf="!loadingInvitations && invitations.length === 0">No pending invitations.</div>

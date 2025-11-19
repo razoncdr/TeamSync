@@ -55,3 +55,23 @@ td {
   padding: 2px 6px;
   border-radius: 4px;
 }
+.badge-pending {
+  background-color: #ffcc00;
+  padding: 4px 10px;
+  border-radius: 4px;
+  color: black;
+}
+
+.badge-accepted {
+  background-color: #4caf50;
+  padding: 4px 10px;
+  border-radius: 4px;
+  color: white;
+}
+
+.badge-rejected {
+  background-color: #f44336;
+  padding: 4px 10px;
+  border-radius: 4px;
+  color: white;
+}
