@@ -46,7 +46,7 @@
     <div class="modal">
       <h3>{{ editingTask ? 'Edit Task' : 'Create Task' }}</h3>
 
-      <form #taskFormRef="ngForm" (ngSubmit)="saveTask()" novalidate>
+      <form #taskFormRef="ngForm" (ngSubmit)="saveTask(taskFormRef)" novalidate>
         <!-- TITLE -->
         <label> Task Title <span class="required">*</span> </label>
         <input

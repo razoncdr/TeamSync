@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProjectService } from '../../services/project';
 
@@ -48,8 +48,11 @@ export class Dashboard implements OnInit {
     this.editingProject = null;
   }
 
-  saveProject() {
-    if (!this.projectForm.name.trim()) return;
+  saveProject(form: NgForm) {
+    if (form.invalid) {
+      form.control.markAllAsTouched();
+      return;
+    }
 
     const action = this.editingProject
       ? this.projectService.updateProject(this.editingProject.id, this.projectForm)

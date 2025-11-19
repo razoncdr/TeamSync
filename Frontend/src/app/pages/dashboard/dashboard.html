@@ -24,20 +24,52 @@
     <div class="modal">
       <h3>{{ editingProject ? 'Edit Project' : 'Create Project' }}</h3>
 
-      <form (ngSubmit)="saveProject()">
-        <input [(ngModel)]="projectForm.name" name="name" placeholder="Project name" required />
-        <textarea
-          [(ngModel)]="projectForm.description"
-          name="description"
-          placeholder="Description"
-          rows="3"
-        ></textarea>
+      <form #projectFormRef="ngForm" (ngSubmit)="saveProject(projectFormRef)">
+  <!-- Name field -->
+  <label>
+    Project Name <span class="required">*</span>
+  </label>
+  <input
+    [(ngModel)]="projectForm.name"
+    name="name"
+    placeholder="Project name"
+    required
+    maxlength="100"
+    #nameModel="ngModel"
+    [class.invalid]="nameModel.invalid && nameModel.touched"
+  />
 
-        <div class="modal-actions">
-          <button type="submit">{{ editingProject ? 'Update' : 'Create' }}</button>
-          <button type="button" class="cancel" (click)="closeModal()">Cancel</button>
-        </div>
-      </form>
+  <!-- Validation errors -->
+  <div class="error" *ngIf="nameModel.errors && nameModel.touched">
+    <span *ngIf="nameModel.errors['required']">Name is required.</span>
+    <span *ngIf="nameModel.errors['maxlength']">Max 100 characters allowed.</span>
+  </div>
+
+  <!-- Description field -->
+  <label>Description</label>
+  <textarea
+    [(ngModel)]="projectForm.description"
+    name="description"
+    placeholder="Description"
+    rows="3"
+    maxlength="1000"
+    #descModel="ngModel"
+    [class.invalid]="descModel.invalid && descModel.touched"
+  ></textarea>
+
+  <!-- Validation errors -->
+  <div class="error" *ngIf="descModel.errors && descModel.touched">
+    <span *ngIf="descModel.errors['maxlength']">Max 1000 characters allowed.</span>
+  </div>
+
+  <div class="modal-actions">
+    <button type="submit" [disabled]="projectFormRef.invalid">
+      {{ editingProject ? 'Update' : 'Create' }}
+    </button>
+    <button type="button" class="cancel" (click)="closeModal()">Cancel</button>
+  </div>
+</form>
+
     </div>
   </div>
 </div>

@@ -107,3 +107,17 @@
 .cancel:hover {
   background: #bbb;
 }
+.required {
+  color: red;
+  font-weight: bold;
+}
+
+.invalid {
+  border: 1px solid red;
+}
+
+.error {
+  color: red;
+  font-size: 13px;
+  margin-top: 3px;
+}

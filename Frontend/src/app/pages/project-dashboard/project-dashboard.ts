@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { TaskService } from '../../services/task';
 import { ProjectService } from '../../services/project';
@@ -83,7 +83,11 @@ export class ProjectDashboard implements OnInit {
     this.editingTask = null;
   }
 
-  saveTask() {
+  saveTask(form: NgForm) {
+    if (form.invalid) {
+      form.control.markAllAsTouched();
+      return;
+    }
     const action = this.editingTask
       ? this.taskService.updateTask(this.editingTask.id, this.taskForm)
       : this.taskService.createTask(this.projectId, this.taskForm);
