@@ -76,6 +76,7 @@ namespace TeamSync.Application.Services
 
 			existing.Name = dto.Name;
 			existing.Description = dto.Description;
+			existing.UpdatedAt = DateTime.UtcNow;
 
 			await _projectRepository.UpdateAsync(existing);
 		}
