@@ -2,13 +2,8 @@
 
 namespace TeamSync.Application.Interfaces.Repositories
 {
-	public interface IProjectRepository
+	public interface IProjectRepository : IRepository<Project>
 	{
-		Task<bool> ExistsAsync(string id);
 		Task<List<Project>> GetAllByUserIdAsync(string userId);
-		Task<Project?> GetByIdAsync(string id);
-		Task AddAsync(Project project);
-		Task UpdateAsync(Project project);
-		Task DeleteAsync(string id);
-	}
+	}	
 }

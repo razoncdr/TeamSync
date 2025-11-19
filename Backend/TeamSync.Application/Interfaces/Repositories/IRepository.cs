@@ -1,10 +1,14 @@
-﻿using System.Linq.Expressions;
-namespace TeamSync.Application.Interfaces.Repositories;
-public interface IRepository<T> where T : class
+﻿using TeamSync.Domain.Entities;
+
+namespace TeamSync.Application.Interfaces.Repositories
 {
-	Task<List<T>> GetAllAsync();
-	Task<T?> GetByIdAsync(Expression<Func<T, bool>> filter);
-	Task AddAsync(T entity);
-	Task UpdateAsync(Expression<Func<T, bool>> filter, T updatedEntity);
-	Task DeleteAsync(Expression<Func<T, bool>> filter);
+	public interface IRepository<T> where T : BaseEntity
+	{
+		Task<bool> ExistsAsync(string id);
+		Task<List<T>> GetAllAsync();
+		Task<T?> GetByIdAsync(string id);
+		Task AddAsync(T entity);
+		Task UpdateAsync(T entity);
+		Task DeleteAsync(string id);
+	}
 }

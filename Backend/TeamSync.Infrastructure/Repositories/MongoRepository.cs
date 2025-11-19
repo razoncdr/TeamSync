@@ -1,30 +1,36 @@
 ﻿using MongoDB.Driver;
-using System.Linq.Expressions;
+using TeamSync.Application.Interfaces.Repositories;
+using TeamSync.Domain.Entities;
 
 namespace TeamSync.Infrastructure.Repositories
 {
-	public class MongoRepository<T> where T : class
+	public class MongoRepository<T> : IRepository<T> where T : BaseEntity
 	{
-		private readonly IMongoCollection<T> _collection;
+		protected readonly IMongoCollection<T> Collection;
 
 		public MongoRepository(IMongoDatabase database, string collectionName)
 		{
-			_collection = database.GetCollection<T>(collectionName);
+			Collection = database.GetCollection<T>(collectionName);
+		}
+		public Task<bool> ExistsAsync(string id) =>
+			Collection.Find(e => e.Id == id).AnyAsync();
+
+		public Task<List<T>> GetAllAsync() =>
+			Collection.Find(_ => true).ToListAsync();
+
+		public Task<T?> GetByIdAsync(string id) =>
+			Collection.Find(e => e.Id == id).FirstOrDefaultAsync();
+
+		public Task AddAsync(T entity) =>
+			Collection.InsertOneAsync(entity);
+
+		public Task UpdateAsync(T entity)
+		{
+			entity.UpdatedAt = DateTime.UtcNow; // automatically set UpdatedAt
+			return Collection.ReplaceOneAsync(e => e.Id == entity.Id, entity);
 		}
 
-		public async Task<List<T>> GetAllAsync() =>
-			await _collection.Find(_ => true).ToListAsync();
-
-		public async Task<T?> GetByIdAsync(Expression<Func<T, bool>> filter) =>
-			await _collection.Find(filter).FirstOrDefaultAsync();
-
-		public async Task AddAsync(T entity) =>
-			await _collection.InsertOneAsync(entity);
-
-		public async Task UpdateAsync(Expression<Func<T, bool>> filter, T updatedEntity) =>
-			await _collection.ReplaceOneAsync(filter, updatedEntity);
-
-		public async Task DeleteAsync(Expression<Func<T, bool>> filter) =>
-			await _collection.DeleteOneAsync(filter);
+		public Task DeleteAsync(string id) =>
+			Collection.DeleteOneAsync(e => e.Id == id);
 	}
 }
