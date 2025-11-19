@@ -23,7 +23,11 @@ export class ManageMembersComponent implements OnInit {
   invitations: any[] = [];
   loadingInvitations = true;
 
-  constructor(private route: ActivatedRoute, private memberService: MemberService, private projectService: ProjectService) {}
+  constructor(
+    private route: ActivatedRoute,
+    private memberService: MemberService,
+    private projectService: ProjectService
+  ) {}
 
   ngOnInit(): void {
     this.projectId = this.route.snapshot.params['projectId'];
@@ -46,18 +50,18 @@ export class ManageMembersComponent implements OnInit {
   }
 
   loadInvitations() {
-  this.loadingInvitations = true;
-  this.projectService.getProjectInvitations(this.projectId).subscribe({
-    next: (res) => {
-      this.invitations = res.data;
-      this.loadingInvitations = false;
-    },
-    error: (err) => {
-      console.error(err);
-      this.loadingInvitations = false;
-    },
-  });
-}
+    this.loadingInvitations = true;
+    this.projectService.getProjectInvitations(this.projectId).subscribe({
+      next: (res) => {
+        this.invitations = res.data;
+        this.loadingInvitations = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.loadingInvitations = false;
+      },
+    });
+  }
 
   invite() {
     if (!this.inviteEmail) return;
@@ -66,6 +70,7 @@ export class ManageMembersComponent implements OnInit {
     this.memberService.inviteMember(this.projectId, this.inviteEmail, this.inviteRole).subscribe({
       next: () => {
         alert('Invitation Sent');
+        this.loadInvitations();
         this.inviteEmail = '';
         this.inviteRole = 'Member';
         this.inviting = false;
@@ -74,6 +79,18 @@ export class ManageMembersComponent implements OnInit {
         console.error(err);
         alert(err.error?.message || 'Error');
         this.inviting = false;
+      },
+    });
+  }
+
+  cancelInvitation(invitationId: string) {
+    if (!confirm('Cancel this invitation?')) return;
+    this.memberService.cancelInvitationById(invitationId).subscribe({
+      next: () => {
+        this.loadInvitations();
+      },
+      error: (err) => {
+        alert(err.error?.message || 'Error canceling invitation');
       },
     });
   }

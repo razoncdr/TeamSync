@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using TeamSync.Application.DTOs;
 using TeamSync.Application.Interfaces.Services;
-using TeamSync.Domain.Enums;
 
 namespace TeamSync.API.Controllers
 {
@@ -43,6 +41,13 @@ namespace TeamSync.API.Controllers
 		{
 			await _invitationService.RejectInvitationAsync(invitationId, UserId);
 			return Ok(new { success = true, message = "Invitation rejected" });
+		}
+
+		[HttpDelete("{id}")]
+		public async Task<IActionResult> DeleteInvitation(string id)
+		{
+			await _invitationService.DeleteAsync(id);
+			return Ok(new { success = true, message = "Project deleted" });
 		}
 	}
 }

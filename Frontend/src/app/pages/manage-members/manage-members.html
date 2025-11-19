@@ -64,6 +64,7 @@
     <th>Role</th>
     <th>Status</th>
     <th>Sent At</th>
+    <th>Action</th>
   </tr>
   <tr *ngFor="let inv of invitations">
     <td>{{ inv.invitedEmail }}</td>
@@ -90,6 +91,9 @@
       </span>
     </td>
     <td>{{ inv.createdAt | date : 'short' }}</td>
+    <td>
+      <button class="remove-btn" (click)="cancelInvitation(inv.id)">Cancel</button>
+    </td>
   </tr>
 </table>
 

@@ -48,4 +48,11 @@ export class MemberService {
   rejectInvitation(id: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/invitations/${id}/reject`, {}, this.getAuthHeaders());
   }
+  
+  cancelInvitationById(id: string): Observable<any> {
+    return this.http.delete(
+      `${this.apiUrl}/invitations/${id}`,
+      this.getAuthHeaders()
+    );
+  }
 }

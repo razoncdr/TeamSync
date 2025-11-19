@@ -20,10 +20,6 @@ public class ProjectInvitationService : IProjectInvitationService
 
 	public async Task<ProjectInvitationDto> InviteAsync(string projectId, InviteMemberDto dto, string invitedByUserId)
 	{
-		Console.WriteLine("projectId: ");
-		Console.WriteLine(projectId);
-		Console.WriteLine("invitedByUserId: ");
-		Console.WriteLine(invitedByUserId);
 		var inviter = await _memberRepo.GetByProjectAndUserAsync(projectId, invitedByUserId)
 			?? throw new ForbiddenException("You are not a member of this project.");
 
@@ -105,5 +101,14 @@ public class ProjectInvitationService : IProjectInvitationService
 
 		invitation.Status = InvitationStatus.Rejected;
 		await _invRepo.UpdateAsync(invitation);
+	}
+
+	public async Task DeleteAsync(string id)
+	{
+		bool exists = await _invRepo.ExistsAsync(id);
+		if (!exists)
+			throw new NotFoundException("Invitation not found");
+
+		await _invRepo.DeleteAsync(id);
 	}
 }
