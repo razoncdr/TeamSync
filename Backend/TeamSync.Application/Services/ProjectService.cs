@@ -3,16 +3,19 @@ using TeamSync.Application.Interfaces.Services;
 using TeamSync.Domain.Entities;
 using TeamSync.Application.Common.Exceptions;
 using TeamSync.Application.DTOs.Project;
+using TeamSync.Domain.Enums;
 
 namespace TeamSync.Application.Services
 {
 	public class ProjectService : IProjectService
 	{
 		private readonly IProjectRepository _projectRepository;
+		private readonly IProjectMemberRepository _memberRepository;
 
-		public ProjectService(IProjectRepository projectRepository)
+		public ProjectService(IProjectRepository projectRepository, IProjectMemberRepository memberRepository)
 		{
 			_projectRepository = projectRepository;
+			_memberRepository = memberRepository;
 		}
 
 		public async Task<List<ProjectResponseDto>> GetUserProjectsAsync(string userId)
@@ -49,6 +52,7 @@ namespace TeamSync.Application.Services
 			if (string.IsNullOrWhiteSpace(dto.Name))
 				throw new ValidationException("Project name is required.");
 
+			// 1. Create Project
 			var project = new Project
 			{
 				Name = dto.Name,
@@ -59,6 +63,18 @@ namespace TeamSync.Application.Services
 
 			await _projectRepository.AddAsync(project);
 
+			// 2. Add creator as project member (Owner role)
+			var member = new ProjectMember
+			{
+				ProjectId = project.Id,
+				UserId = userId,
+				Role = ProjectRole.Owner,
+				CreatedAt = DateTime.UtcNow
+			};
+
+			await _memberRepository.AddAsync(member);
+
+			// 3. Return
 			return new ProjectResponseDto
 			{
 				Id = project.Id,
@@ -68,6 +84,7 @@ namespace TeamSync.Application.Services
 				CreatedAt = project.CreatedAt
 			};
 		}
+
 
 		public async Task UpdateProjectAsync(string id, UpdateProjectDto dto)
 		{
