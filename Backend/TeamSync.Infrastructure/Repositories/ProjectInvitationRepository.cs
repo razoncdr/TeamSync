@@ -10,11 +10,11 @@ namespace TeamSync.Infrastructure.Repositories
 		public ProjectInvitationRepository(IMongoDatabase database)
 			: base(database, "ProjectInvitations") { }
 
-		public Task<ProjectInvitation?> GetByIdAsync(string id) =>
-			Collection.Find(i => i.Id == id).FirstOrDefaultAsync();
-
 		public Task<List<ProjectInvitation>> GetByUserEmailAsync(string email) =>
 			Collection.Find(i => i.InvitedEmail == email).ToListAsync();
+
+		public Task<List<ProjectInvitation>> GetByProjectIdAsync(string projectId) =>
+			Collection.Find(i => i.ProjectId == projectId).ToListAsync();
 
 		public Task<bool> ExistsPendingAsync(string projectId, string email) =>
 			Collection.Find(i => i.ProjectId == projectId && i.InvitedEmail == email && i.Status == InvitationStatus.Pending)

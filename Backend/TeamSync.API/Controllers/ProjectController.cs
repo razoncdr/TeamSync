@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using TeamSync.Application.Interfaces.Services;
 using TeamSync.Application.DTOs.Project;
+using TeamSync.Application.Interfaces.Services;
 
 namespace TeamSync.API.Controllers
 {
@@ -55,6 +55,14 @@ namespace TeamSync.API.Controllers
 		{
 			await _projectService.DeleteProjectAsync(id);
 			return Ok(new { success = true, message = "Project deleted" });
+		}
+
+		[HttpGet("{id}/invitations")]
+		public async Task<IActionResult> GetProjectInvitations(string id)
+		{
+			Console.WriteLine("Came here");
+			var invitations = await _projectService.GetProjectInvitationsAsync(id, UserId);
+			return Ok(new { success = true, message = "Project invitations fetched", data = invitations });
 		}
 	}
 }

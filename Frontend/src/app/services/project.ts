@@ -29,6 +29,10 @@ export class ProjectService {
     return this.http.get<ApiResponse<any>>(`${this.apiUrl}/${id}`, this.getAuthHeaders());
   }
 
+  getProjectInvitations(id: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/${id}/invitations`, this.getAuthHeaders());
+  }
+
   createProject(data: any): Observable<ApiResponse<any>> {
     return this.http.post<ApiResponse<any>>(this.apiUrl, data, this.getAuthHeaders());
   }

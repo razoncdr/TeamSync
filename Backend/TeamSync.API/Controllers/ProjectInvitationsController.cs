@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TeamSync.Application.DTOs;
 using TeamSync.Application.Interfaces.Services;
+using TeamSync.Domain.Enums;
 
 namespace TeamSync.API.Controllers
 {
@@ -30,7 +31,6 @@ namespace TeamSync.API.Controllers
 			var invitations = await _invitationService.GetUserInvitationsAsync(UserEmail);
 			return Ok(new { success = true, message = "Invitations fetched", data = invitations });
 		}
-
 		[HttpPost("{invitationId}/accept")]
 		public async Task<IActionResult> Accept(string invitationId)
 		{

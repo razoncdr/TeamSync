@@ -1,8 +1,10 @@
-﻿using TeamSync.Application.Interfaces.Repositories;
+﻿using TeamSync.Application.Common.Exceptions;
+using TeamSync.Application.DTOs;
+using TeamSync.Application.DTOs.Project;
+using TeamSync.Application.Exceptions;
+using TeamSync.Application.Interfaces.Repositories;
 using TeamSync.Application.Interfaces.Services;
 using TeamSync.Domain.Entities;
-using TeamSync.Application.Common.Exceptions;
-using TeamSync.Application.DTOs.Project;
 using TeamSync.Domain.Enums;
 
 namespace TeamSync.Application.Services
@@ -11,11 +13,13 @@ namespace TeamSync.Application.Services
 	{
 		private readonly IProjectRepository _projectRepository;
 		private readonly IProjectMemberRepository _memberRepository;
+		private readonly IProjectInvitationRepository _invRepository;
 
-		public ProjectService(IProjectRepository projectRepository, IProjectMemberRepository memberRepository)
+		public ProjectService(IProjectRepository projectRepository, IProjectMemberRepository memberRepository, IProjectInvitationRepository invRepository)
 		{
 			_projectRepository = projectRepository;
 			_memberRepository = memberRepository;
+			_invRepository = invRepository;
 		}
 
 		public async Task<List<ProjectResponseDto>> GetUserProjectsAsync(string userId)
@@ -106,5 +110,27 @@ namespace TeamSync.Application.Services
 
 			await _projectRepository.DeleteAsync(id);
 		}
+
+		public async Task<List<ProjectInvitationDto>> GetProjectInvitationsAsync(string projectId, string userId)
+		{
+			var member = await _memberRepository.GetByProjectAndUserAsync(projectId, userId)
+				?? throw new ForbiddenException("You are not a member of this project.");
+
+			if (member.Role != ProjectRole.Owner && member.Role != ProjectRole.Admin)
+				throw new ForbiddenException("Only Admins or Owner can view project invitations.");
+
+			var invitations = await _invRepository.GetByProjectIdAsync(projectId);
+
+			return invitations.Select(inv => new ProjectInvitationDto
+			{
+				Id = inv.Id,
+				ProjectId = inv.ProjectId,
+				InvitedEmail = inv.InvitedEmail,
+				Role = inv.Role,
+				Status = inv.Status,
+				CreatedAt = inv.CreatedAt
+			}).ToList();
+		}
+
 	}
 }

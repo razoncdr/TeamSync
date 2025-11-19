@@ -51,3 +51,39 @@
     {{ inviting ? 'Sending...' : 'Send Invite' }}
   </button>
 </div>
+<hr />
+
+<!-- Pending Invitations -->
+<h3>Pending Invitations</h3>
+
+<div *ngIf="loadingInvitations">Loading invitations...</div>
+
+<table *ngIf="!loadingInvitations && invitations.length > 0">
+  <tr>
+    <th>Email</th>
+    <th>Role</th>
+    <th>Status</th>
+    <th>Sent At</th>
+  </tr>
+  <tr *ngFor="let inv of invitations">
+    <td>{{ inv.invitedEmail }}</td>
+    <td>
+      <span
+        [ngClass]="{
+          'badge-owner': inv.role === 'Owner',
+          'badge-admin': inv.role === 'Admin',
+          'badge-editor': inv.role === 'Editor',
+          'badge-viewer': inv.role === 'Viewer'
+        }"
+        >{{ inv.role }}</span
+      >
+    </td>
+    <td>{{ inv.status }}</td>
+    <td>{{ inv.createdAt | date:'short' }}</td>
+  </tr>
+</table>
+
+<div *ngIf="!loadingInvitations && invitations.length === 0">
+  No pending invitations.
+</div>
+

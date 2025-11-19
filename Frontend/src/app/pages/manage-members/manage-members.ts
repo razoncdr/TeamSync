@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MemberService } from '../../services/member';
 import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ProjectService } from '../../services/project';
 
 @Component({
   selector: 'app-manage-members',
@@ -19,12 +20,15 @@ export class ManageMembersComponent implements OnInit {
   inviteEmail = '';
   inviteRole = 'Member';
   inviting = false;
+  invitations: any[] = [];
+  loadingInvitations = true;
 
-  constructor(private route: ActivatedRoute, private memberService: MemberService) {}
+  constructor(private route: ActivatedRoute, private memberService: MemberService, private projectService: ProjectService) {}
 
   ngOnInit(): void {
     this.projectId = this.route.snapshot.params['projectId'];
     this.loadMembers();
+    this.loadInvitations();
   }
 
   loadMembers() {
@@ -40,6 +44,20 @@ export class ManageMembersComponent implements OnInit {
       },
     });
   }
+
+  loadInvitations() {
+  this.loadingInvitations = true;
+  this.projectService.getProjectInvitations(this.projectId).subscribe({
+    next: (res) => {
+      this.invitations = res.data;
+      this.loadingInvitations = false;
+    },
+    error: (err) => {
+      console.error(err);
+      this.loadingInvitations = false;
+    },
+  });
+}
 
   invite() {
     if (!this.inviteEmail) return;
