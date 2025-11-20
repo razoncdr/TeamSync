@@ -8,11 +8,12 @@ namespace TeamSync.Infrastructure.Repositories
 	{
 		public ProjectRepository(IMongoDatabase database)
 			: base(database, "Projects") { }
-
-		public Task<bool> ExistsAsync(string id) =>
-			Collection.Find(p => p.Id == id).AnyAsync();
-
 		public Task<List<Project>> GetAllByUserIdAsync(string userId) =>
 			Collection.Find(p => p.OwnerId == userId).ToListAsync();
+		public async Task<List<Project>> GetAllByIdsAsync(List<string> ids)
+		{
+			return await Collection.Find(p => ids.Contains(p.Id)).ToListAsync();
+		}
+
 	}
 }

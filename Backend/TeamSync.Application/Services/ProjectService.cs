@@ -22,8 +22,19 @@ namespace TeamSync.Application.Services
 
 		public async Task<List<ProjectResponseDto>> GetUserProjectsAsync(string userId)
 		{
-			var projects = await _projectRepository.GetAllByUserIdAsync(userId);
+			// 1. Get all project memberships for the user
+			var memberships = await _memberRepository.GetAllByUserIdAsync(userId); // you need a method in ProjectMemberRepository
 
+			if (memberships == null || !memberships.Any())
+				return new List<ProjectResponseDto>();
+
+			// 2. Get all project IDs from memberships
+			var projectIds = memberships.Select(m => m.ProjectId).ToList();
+
+			// 3. Fetch projects by IDs
+			var projects = await _projectRepository.GetAllByIdsAsync(projectIds); // you need a method to get multiple projects by IDs
+
+			// 4. Map to DTO
 			return projects.Select(p => new ProjectResponseDto
 			{
 				Id = p.Id,
@@ -33,6 +44,7 @@ namespace TeamSync.Application.Services
 				CreatedAt = p.CreatedAt
 			}).ToList();
 		}
+
 
 		public async Task<ProjectResponseDto> GetProjectByIdAsync(string id)
 		{
