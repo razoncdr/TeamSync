@@ -1,4 +1,5 @@
-﻿using TeamSync.Application.DTOs.Project;
+﻿using TeamSync.Application.DTOs;
+using TeamSync.Application.DTOs.Project;
 
 namespace TeamSync.Application.Interfaces.Services
 {

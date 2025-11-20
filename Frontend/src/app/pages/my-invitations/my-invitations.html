@@ -1,0 +1,49 @@
+<div class="invitations-container">
+  <h2>My Invitations</h2>
+
+  <div *ngIf="loading" class="loading">Loading invitations...</div>
+
+  <table *ngIf="!loading && invitations.length > 0">
+    <tr>
+      <th>ProjectId</th>
+      <th>Invited By</th>
+      <th>Role</th>
+      <th>Date</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+
+    <tr *ngFor="let inv of invitations">
+      <td>{{ inv.projectId }}</td>
+      <td>{{ inv.invitedUserId || 'Unknown' }}</td>
+      <td>{{ inv.role }}</td>
+      <td>{{ inv.createdAt | date }}</td>
+
+      <td>
+        <span
+          [ngClass]="{
+            'badge-pending': inv.status === 'Pending',
+            'badge-accepted': inv.status === 'Accepted',
+            'badge-rejected': inv.status === 'Rejected'
+          }"
+        >
+          {{ inv.status }}
+        </span>
+      </td>
+
+      <td>
+        <button *ngIf="inv.status === 'Pending'" class="btn accept" (click)="accept(inv.id)">
+          Accept
+        </button>
+
+        <button *ngIf="inv.status === 'Pending'" class="btn reject" (click)="reject(inv.id)">
+          Reject
+        </button>
+
+        <span *ngIf="inv.status !== 'Pending'" class="no-action">———</span>
+      </td>
+    </tr>
+  </table>
+
+  <div *ngIf="!loading && invitations.length === 0" class="no-data">You have no invitations.</div>
+</div>
