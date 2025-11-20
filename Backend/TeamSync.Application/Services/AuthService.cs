@@ -12,11 +12,13 @@ namespace TeamSync.Application.Services
 	{
 		private readonly IUserRepository _userRepository;
 		private readonly IJwtService _jwtService;
+		private readonly IRedisCacheService _redisCacheService;
 
-		public AuthService(IUserRepository userRepository, IJwtService jwtService)
+		public AuthService(IUserRepository userRepository, IJwtService jwtService, IRedisCacheService redisCacheService)
 		{
 			_userRepository = userRepository;
 			_jwtService = jwtService;
+			_redisCacheService = redisCacheService;
 		}
 
 		public async Task<User?> GetByEmailAsync(string email)
@@ -46,17 +48,39 @@ namespace TeamSync.Application.Services
 
 		public async Task<string> LoginAsync(LoginUserDto dto)
 		{
-			var user = await _userRepository.GetByEmailAsync(dto.Email);
-			if (user == null)
-				throw new UnauthorizedException("Invalid credentials.");
+			// Try getting user from Redis first
+			var cacheKey = $"user:{dto.Email}";
+			var cachedUser = await _redisCacheService.GetAsync<User>(cacheKey);
 
-			using var hmac = new HMACSHA512(user.PasswordSalt);
-			var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(dto.Password));
+			User user;
+			if (cachedUser != null)
+			{
+				Console.WriteLine("--- cache hit ---");
+				user = cachedUser;
+			}
+			else
+			{
+				Console.WriteLine("--- cache miss ---");
+				user = await _userRepository.GetByEmailAsync(dto.Email);
+				if (user == null)
+					throw new UnauthorizedException("Invalid credentials.");
 
-			if (!computedHash.SequenceEqual(user.PasswordHash))
-				throw new UnauthorizedException("Invalid credentials.");
+				using var hmac = new HMACSHA512(user.PasswordSalt);
+				var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(dto.Password));
+
+				if (!computedHash.SequenceEqual(user.PasswordHash))
+					throw new UnauthorizedException("Invalid credentials.");
+
+				// Cache user info for 30 minutes
+				await _redisCacheService.SetAsync(cacheKey, user, TimeSpan.FromMinutes(30));
+			}
 
 			return _jwtService.GenerateToken(user);
+		}
+
+		public async Task RemoveUserCacheAsync(string email)
+		{
+			await _redisCacheService.RemoveAsync($"user:{email}");
 		}
 	}
 }
