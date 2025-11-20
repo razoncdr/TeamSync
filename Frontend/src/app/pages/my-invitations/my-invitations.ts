@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { MemberService } from '../../services/member';
 import { NgIf, NgFor, DatePipe, NgClass } from '@angular/common';
+import { InvitationService } from '../../services/invitation';
 
 @Component({
   selector: 'app-my-invitations',
@@ -13,7 +13,7 @@ export class MyInvitations implements OnInit {
   invitations: any[] = [];
   loading = true;
 
-  constructor(private memberService: MemberService) {}
+  constructor(private invitationService: InvitationService) {}
 
   ngOnInit() {
     this.load();
@@ -22,9 +22,9 @@ export class MyInvitations implements OnInit {
   load() {
     this.loading = true;
 
-    this.memberService.getMyInvitations().subscribe({
+    this.invitationService.getMyInvitations().subscribe({
       next: (res) => {
-        this.invitations = res.data;
+        this.invitations = res.data || [];
         this.loading = false;
       },
       error: (err) => {
@@ -35,7 +35,7 @@ export class MyInvitations implements OnInit {
   }
 
   accept(id: string) {
-    this.memberService.acceptInvitation(id).subscribe({
+    this.invitationService.acceptInvitation(id).subscribe({
       next: () => {
         alert('Invitation accepted');
         this.load();
@@ -47,7 +47,7 @@ export class MyInvitations implements OnInit {
   }
 
   reject(id: string) {
-    this.memberService.rejectInvitation(id).subscribe({
+    this.invitationService.rejectInvitation(id).subscribe({
       next: () => {
         alert('Invitation rejected');
         this.load();

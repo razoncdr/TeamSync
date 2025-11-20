@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TeamSync.Application.Interfaces.Services;
+using TeamSync.Application.Services;
 
 namespace TeamSync.API.Controllers
 {
@@ -23,6 +24,14 @@ namespace TeamSync.API.Controllers
 			User.FindFirstValue(ClaimTypes.NameIdentifier)
 			?? throw new UnauthorizedAccessException("User not found in token.");
 
+
+		[HttpGet("project/{projectId}")]
+		public async Task<IActionResult> GetProjectInvitations(string projectId)
+		{
+			Console.WriteLine("Came here");
+			var invitations = await _invitationService.GetProjectInvitationsAsync(projectId, UserId);
+			return Ok(new { success = true, message = "Project invitations fetched", data = invitations });
+		}
 		[HttpGet]
 		public async Task<IActionResult> GetUserInvitations()
 		{

@@ -54,6 +54,26 @@ public class ProjectInvitationService : IProjectInvitationService
 		};
 	}
 
+	public async Task<List<ProjectInvitationDto>> GetProjectInvitationsAsync(string projectId, string userId)
+	{
+		var member = await _memberRepo.GetByProjectAndUserAsync(projectId, userId)
+			?? throw new ForbiddenException("You are not a member of this project.");
+
+		if (member.Role != ProjectRole.Owner && member.Role != ProjectRole.Admin)
+			throw new ForbiddenException("Only Admins or Owner can view project invitations.");
+
+		var invitations = await _invRepo.GetByProjectIdAsync(projectId);
+
+		return invitations.Select(inv => new ProjectInvitationDto
+		{
+			Id = inv.Id,
+			ProjectId = inv.ProjectId,
+			InvitedEmail = inv.InvitedEmail,
+			Role = inv.Role,
+			Status = inv.Status,
+			CreatedAt = inv.CreatedAt
+		}).ToList();
+	}
 	public async Task<List<ProjectInvitationDto>> GetUserInvitationsAsync(string userEmail)
 	{
 		var invitations = await _invRepo.GetByUserEmailAsync(userEmail);

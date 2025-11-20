@@ -56,13 +56,5 @@ namespace TeamSync.API.Controllers
 			await _projectService.DeleteProjectAsync(id);
 			return Ok(new { success = true, message = "Project deleted" });
 		}
-
-		[HttpGet("{id}/invitations")]
-		public async Task<IActionResult> GetProjectInvitations(string id)
-		{
-			Console.WriteLine("Came here");
-			var invitations = await _projectService.GetProjectInvitationsAsync(id, UserId);
-			return Ok(new { success = true, message = "Project invitations fetched", data = invitations });
-		}
 	}
 }

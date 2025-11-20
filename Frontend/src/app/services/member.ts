@@ -35,24 +35,4 @@ export class MemberService {
       this.getAuthHeaders()
     );
   }
-
-  // Invitations for current logged-in user
-  getMyInvitations(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/invitations`, this.getAuthHeaders());
-  }
-
-  acceptInvitation(id: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/invitations/${id}/accept`, {}, this.getAuthHeaders());
-  }
-
-  rejectInvitation(id: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/invitations/${id}/reject`, {}, this.getAuthHeaders());
-  }
-  
-  cancelInvitationById(id: string): Observable<any> {
-    return this.http.delete(
-      `${this.apiUrl}/invitations/${id}`,
-      this.getAuthHeaders()
-    );
-  }
 }

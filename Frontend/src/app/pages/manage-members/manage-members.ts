@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MemberService } from '../../services/member';
 import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ProjectService } from '../../services/project';
+import { InvitationService } from '../../services/invitation';
 
 @Component({
   selector: 'app-manage-members',
@@ -26,7 +26,7 @@ export class ManageMembersComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private memberService: MemberService,
-    private projectService: ProjectService
+    private invitationService: InvitationService
   ) {}
 
   ngOnInit(): void {
@@ -51,9 +51,9 @@ export class ManageMembersComponent implements OnInit {
 
   loadInvitations() {
     this.loadingInvitations = true;
-    this.projectService.getProjectInvitations(this.projectId).subscribe({
+    this.invitationService.getProjectInvitations(this.projectId).subscribe({
       next: (res) => {
-        this.invitations = res.data;
+        this.invitations = res.data || [];
         this.loadingInvitations = false;
       },
       error: (err) => {
@@ -85,7 +85,7 @@ export class ManageMembersComponent implements OnInit {
 
   cancelInvitation(invitationId: string) {
     if (!confirm('Cancel this invitation?')) return;
-    this.memberService.cancelInvitationById(invitationId).subscribe({
+    this.invitationService.cancelInvitation(invitationId).subscribe({
       next: () => {
         this.loadInvitations();
       },
