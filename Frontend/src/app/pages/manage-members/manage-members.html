@@ -91,7 +91,7 @@
       </span>
     </td>
     <td>{{ inv.createdAt | date : 'short' }}</td>
-    <td>
+    <td *ngIf="inv.status === 'Pending'">
       <button class="remove-btn" (click)="cancelInvitation(inv.id)">Cancel</button>
     </td>
   </tr>
