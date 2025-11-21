@@ -9,10 +9,12 @@ namespace TeamSync.Application.Services;
 public class ProjectMemberService : IProjectMemberService
 {
 	private readonly IProjectMemberRepository _memberRepo;
+	private readonly IRedisCacheService _redisCacheService;
 
-	public ProjectMemberService(IProjectMemberRepository memberRepo)
+	public ProjectMemberService(IProjectMemberRepository memberRepo, IRedisCacheService redisCacheService)
 	{
 		_memberRepo = memberRepo;
+		_redisCacheService = redisCacheService;
 	}
 
 	public async Task<List<ProjectMemberDto>> GetMembersAsync(string projectId)
@@ -40,6 +42,8 @@ public class ProjectMemberService : IProjectMemberService
 
 		if (currentUser.Role != ProjectRole.Owner && currentUser.Role != ProjectRole.Admin)
 			throw new ForbiddenException("Only Admins can remove members.");
+
+		await _redisCacheService.RemoveAsync($"user:{userId}:projects");
 
 		await _memberRepo.DeleteAsync(member.Id);
 	}

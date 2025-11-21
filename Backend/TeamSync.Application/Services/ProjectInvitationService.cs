@@ -11,11 +11,13 @@ public class ProjectInvitationService : IProjectInvitationService
 {
 	private readonly IProjectInvitationRepository _invRepo;
 	private readonly IProjectMemberRepository _memberRepo;
+	private readonly IRedisCacheService _redisCacheService;
 
-	public ProjectInvitationService(IProjectInvitationRepository invRepo, IProjectMemberRepository memberRepo)
+	public ProjectInvitationService(IProjectInvitationRepository invRepo, IProjectMemberRepository memberRepo, IRedisCacheService redisCacheService)
 	{
 		_invRepo = invRepo;
 		_memberRepo = memberRepo;
+		_redisCacheService = redisCacheService;
 	}
 
 	public async Task<ProjectInvitationDto> InviteAsync(string projectId, InviteMemberDto dto, string invitedByUserId)
@@ -107,6 +109,8 @@ public class ProjectInvitationService : IProjectInvitationService
 			Role = invitation.Role,
 			JoinedAt = DateTime.UtcNow
 		};
+
+		await _redisCacheService.RemoveAsync($"user:{userId}:projects");
 
 		await _memberRepo.AddAsync(member);
 	}
