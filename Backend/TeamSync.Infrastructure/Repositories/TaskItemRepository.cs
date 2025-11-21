@@ -9,10 +9,13 @@ namespace TeamSync.Infrastructure.Repositories
 		public TaskItemRepository(IMongoDatabase database)
 			: base(database, "Tasks") { }
 
-		public Task<bool> ExistsAsync(string id) =>
-			Collection.Find(t => t.Id == id).AnyAsync();
-
 		public Task<List<TaskItem>> GetByProjectIdAsync(string projectId) =>
 			Collection.Find(t => t.ProjectId == projectId).ToListAsync();
+
+		public async Task DeleteByProjectIdAsync(string projectId)
+		{
+			var filter = Builders<TaskItem>.Filter.Eq(t => t.ProjectId, projectId);
+			await Collection.DeleteManyAsync(filter);
+		}
 	}
 }

@@ -10,15 +10,18 @@ namespace TeamSync.Application.Services
 	public class ProjectService : IProjectService
 	{
 		private readonly IProjectRepository _projectRepository;
+		private readonly ITaskRepository _taskRepository;
 		private readonly IProjectMemberRepository _memberRepository;
 		private readonly IRedisCacheService _redisCacheService;
 
 		public ProjectService(
 			IProjectRepository projectRepository,
+			ITaskRepository taskRepository,
 			IProjectMemberRepository memberRepository,
 			IRedisCacheService redisCacheService)
 		{
 			_projectRepository = projectRepository;
+			_taskRepository = taskRepository;
 			_memberRepository = memberRepository;
 			_redisCacheService = redisCacheService;
 		}
@@ -159,7 +162,8 @@ namespace TeamSync.Application.Services
 			// Remove project cache
 			await _redisCacheService.RemoveAsync($"project:{id}");
 
-			// TODO: delete related data (tasks, members, chat messages) here
+			await _memberRepository.DeleteByProjectIdAsync(id);
+			await _taskRepository.DeleteByProjectIdAsync(id);
 			await _projectRepository.DeleteAsync(id);
 		}
 	}
