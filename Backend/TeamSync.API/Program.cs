@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 using System.Text;
 using System.Text.Json.Serialization;
 using TeamSync.API.Middleware;
@@ -58,6 +59,14 @@ builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<ITaskRepository, TaskItemRepository>();
 builder.Services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
 builder.Services.AddScoped<IProjectInvitationRepository, ProjectInvitationRepository>();
+
+var redis = ConnectionMultiplexer.Connect("localhost:6379");
+builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
+builder.Services.AddSingleton<IRedisCacheService, RedisCacheService>();
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+	ConnectionMultiplexer.Connect("localhost:6379"));
+builder.Services.AddSingleton<IRedisCacheService, RedisCacheService>();
 
 // JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JWTSettings").Get<JWTSettings>();

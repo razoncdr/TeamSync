@@ -8,5 +8,6 @@ namespace TeamSync.Application.Interfaces.Repositories
 		Task<List<ProjectMember>> GetAllByProjectAsync(string projectId);
 		Task<List<ProjectMember>> GetAllByUserIdAsync(string userId);
 		Task<bool> ExistsByUserIdAsync(string projectId, string userId);
+		Task DeleteByProjectIdAsync(string projectId);
 	}
 }

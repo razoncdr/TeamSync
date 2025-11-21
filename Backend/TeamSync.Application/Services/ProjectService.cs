@@ -1,7 +1,5 @@
 ﻿using TeamSync.Application.Common.Exceptions;
-using TeamSync.Application.DTOs;
 using TeamSync.Application.DTOs.Project;
-using TeamSync.Application.Exceptions;
 using TeamSync.Application.Interfaces.Repositories;
 using TeamSync.Application.Interfaces.Services;
 using TeamSync.Domain.Entities;
@@ -12,46 +10,75 @@ namespace TeamSync.Application.Services
 	public class ProjectService : IProjectService
 	{
 		private readonly IProjectRepository _projectRepository;
+		private readonly ITaskRepository _taskRepository;
 		private readonly IProjectMemberRepository _memberRepository;
+		private readonly IRedisCacheService _redisCacheService;
 
-		public ProjectService(IProjectRepository projectRepository, IProjectMemberRepository memberRepository)
+		public ProjectService(
+			IProjectRepository projectRepository,
+			ITaskRepository taskRepository,
+			IProjectMemberRepository memberRepository,
+			IRedisCacheService redisCacheService)
 		{
 			_projectRepository = projectRepository;
+			_taskRepository = taskRepository;
 			_memberRepository = memberRepository;
+			_redisCacheService = redisCacheService;
 		}
 
 		public async Task<List<ProjectResponseDto>> GetUserProjectsAsync(string userId)
 		{
-			// 1. Get all project memberships for the user
-			var memberships = await _memberRepository.GetAllByUserIdAsync(userId); // you need a method in ProjectMemberRepository
+			var idsCacheKey = $"user:{userId}:projects";
+			var projectIds = await _redisCacheService.GetAsync<List<string>>(idsCacheKey);
 
-			if (memberships == null || !memberships.Any())
-				return new List<ProjectResponseDto>();
-
-			// 2. Get all project IDs from memberships
-			var projectIds = memberships.Select(m => m.ProjectId).ToList();
-
-			// 3. Fetch projects by IDs
-			var projects = await _projectRepository.GetAllByIdsAsync(projectIds); // you need a method to get multiple projects by IDs
-
-			// 4. Map to DTO
-			return projects.Select(p => new ProjectResponseDto
+			if (projectIds == null)
 			{
-				Id = p.Id,
-				Name = p.Name,
-				Description = p.Description,
-				OwnerId = p.OwnerId,
-				CreatedAt = p.CreatedAt
-			}).ToList();
-		}
+				// Cache miss → get project IDs from membership table
+				var memberships = await _memberRepository.GetAllByUserIdAsync(userId);
+				if (memberships == null || !memberships.Any())
+					return new List<ProjectResponseDto>();
 
+				projectIds = memberships.Select(m => m.ProjectId).ToList();
+				await _redisCacheService.SetAsync(idsCacheKey, projectIds, TimeSpan.FromMinutes(30));
+			}
+
+			// Fetch projects in parallel using per-project cache
+			var projectTasks = projectIds.Select(async id =>
+			{
+				var projectCacheKey = $"project:{id}";
+				var cachedProject = await _redisCacheService.GetAsync<ProjectResponseDto>(projectCacheKey);
+				if (cachedProject != null) return cachedProject;
+
+				var project = await _projectRepository.GetByIdAsync(id);
+				if (project == null) return null;
+
+				var dto = new ProjectResponseDto
+				{
+					Id = project.Id,
+					Name = project.Name,
+					Description = project.Description,
+					OwnerId = project.OwnerId,
+					CreatedAt = project.CreatedAt
+				};
+
+				await _redisCacheService.SetAsync(projectCacheKey, dto, TimeSpan.FromMinutes(30));
+				return dto;
+			});
+
+			var projectDtos = (await Task.WhenAll(projectTasks)).Where(p => p != null).ToList();
+			return projectDtos;
+		}
 
 		public async Task<ProjectResponseDto> GetProjectByIdAsync(string id)
 		{
-			var project = await _projectRepository.GetByIdAsync(id)
-				?? throw new NotFoundException("Project not found");
+			var projectCacheKey = $"project:{id}";
+			var cachedProject = await _redisCacheService.GetAsync<ProjectResponseDto>(projectCacheKey);
+			if (cachedProject != null) return cachedProject;
 
-			return new ProjectResponseDto
+			var project = await _projectRepository.GetByIdAsync(id)
+						  ?? throw new NotFoundException("Project not found");
+
+			var dto = new ProjectResponseDto
 			{
 				Id = project.Id,
 				Name = project.Name,
@@ -59,6 +86,9 @@ namespace TeamSync.Application.Services
 				OwnerId = project.OwnerId,
 				CreatedAt = project.CreatedAt
 			};
+
+			await _redisCacheService.SetAsync(projectCacheKey, dto, TimeSpan.FromMinutes(30));
+			return dto;
 		}
 
 		public async Task<ProjectResponseDto> CreateProjectAsync(string userId, CreateProjectDto dto)
@@ -66,7 +96,6 @@ namespace TeamSync.Application.Services
 			if (string.IsNullOrWhiteSpace(dto.Name))
 				throw new ValidationException("Project name is required.");
 
-			// 1. Create Project
 			var project = new Project
 			{
 				Name = dto.Name,
@@ -77,7 +106,6 @@ namespace TeamSync.Application.Services
 
 			await _projectRepository.AddAsync(project);
 
-			// 2. Add creator as project member (Owner role)
 			var member = new ProjectMember
 			{
 				ProjectId = project.Id,
@@ -88,7 +116,9 @@ namespace TeamSync.Application.Services
 
 			await _memberRepository.AddAsync(member);
 
-			// 3. Return
+			// Invalidate per-user project IDs cache
+			await _redisCacheService.RemoveAsync($"user:{userId}:projects");
+
 			return new ProjectResponseDto
 			{
 				Id = project.Id,
@@ -99,17 +129,24 @@ namespace TeamSync.Application.Services
 			};
 		}
 
-
 		public async Task UpdateProjectAsync(string id, UpdateProjectDto dto)
 		{
 			var existing = await _projectRepository.GetByIdAsync(id)
-				?? throw new NotFoundException("Project not found");
+						  ?? throw new NotFoundException("Project not found");
 
 			existing.Name = dto.Name;
 			existing.Description = dto.Description;
 			existing.UpdatedAt = DateTime.UtcNow;
 
 			await _projectRepository.UpdateAsync(existing);
+
+			// Invalidate per-project cache
+			await _redisCacheService.RemoveAsync($"project:{id}");
+
+			// Invalidate all member project IDs cache
+			var members = await _memberRepository.GetAllByProjectAsync(id);
+			await Task.WhenAll(members.Select(m =>
+				_redisCacheService.RemoveAsync($"user:{m.UserId}:projects")));
 		}
 
 		public async Task DeleteProjectAsync(string id)
@@ -118,6 +155,15 @@ namespace TeamSync.Application.Services
 			if (!exists)
 				throw new NotFoundException("Project not found");
 
+			var members = await _memberRepository.GetAllByProjectAsync(id);
+			await Task.WhenAll(members.Select(m =>
+				_redisCacheService.RemoveAsync($"user:{m.UserId}:projects")));
+
+			// Remove project cache
+			await _redisCacheService.RemoveAsync($"project:{id}");
+
+			await _memberRepository.DeleteByProjectIdAsync(id);
+			await _taskRepository.DeleteByProjectIdAsync(id);
 			await _projectRepository.DeleteAsync(id);
 		}
 	}

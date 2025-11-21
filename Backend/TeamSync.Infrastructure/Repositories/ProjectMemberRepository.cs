@@ -20,5 +20,11 @@ namespace TeamSync.Infrastructure.Repositories
 
 		public Task<bool> ExistsByUserIdAsync(string projectId, string userId) =>
 			Collection.Find(m => m.ProjectId == projectId && m.UserId == userId).AnyAsync();
+
+		public async Task DeleteByProjectIdAsync(string projectId)
+		{
+			var filter = Builders<ProjectMember>.Filter.Eq(m => m.ProjectId, projectId);
+			await Collection.DeleteManyAsync(filter);
+		}
 	}
 }
