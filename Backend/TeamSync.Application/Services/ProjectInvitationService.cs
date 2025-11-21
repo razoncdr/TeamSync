@@ -45,6 +45,8 @@ public class ProjectInvitationService : IProjectInvitationService
 
 		await _invRepo.AddAsync(invitation);
 
+		await _redisCacheService.RemoveAsync($"user:{dto.Email}:invitations");
+
 		return new ProjectInvitationDto
 		{
 			Id = invitation.Id,
@@ -78,8 +80,14 @@ public class ProjectInvitationService : IProjectInvitationService
 	}
 	public async Task<List<ProjectInvitationDto>> GetUserInvitationsAsync(string userEmail)
 	{
+		var cacheKey = $"user:{userEmail}:invitations";
+
+		var cachedInvites = await _redisCacheService.GetAsync<List<ProjectInvitationDto>>(cacheKey);
+		if (cachedInvites != null)
+			return cachedInvites;
+
 		var invitations = await _invRepo.GetByUserEmailAsync(userEmail);
-		return invitations.Select(inv => new ProjectInvitationDto
+		var dtos = invitations.Select(inv => new ProjectInvitationDto
 		{
 			Id = inv.Id,
 			ProjectId = inv.ProjectId,
@@ -88,6 +96,10 @@ public class ProjectInvitationService : IProjectInvitationService
 			Status = inv.Status,
 			CreatedAt = inv.CreatedAt
 		}).ToList();
+
+		await _redisCacheService.SetAsync(cacheKey, dtos, TimeSpan.FromMinutes(10));
+
+		return dtos;
 	}
 
 	public async Task AcceptInvitationAsync(string invitationId, string userId)
@@ -110,9 +122,10 @@ public class ProjectInvitationService : IProjectInvitationService
 			JoinedAt = DateTime.UtcNow
 		};
 
-		await _redisCacheService.RemoveAsync($"user:{userId}:projects");
-
 		await _memberRepo.AddAsync(member);
+
+		await _redisCacheService.RemoveAsync($"user:{invitation.InvitedEmail}:invitations");
+		await _redisCacheService.RemoveAsync($"user:{userId}:projects");
 	}
 
 	public async Task RejectInvitationAsync(string invitationId, string userId)
@@ -125,14 +138,17 @@ public class ProjectInvitationService : IProjectInvitationService
 
 		invitation.Status = InvitationStatus.Rejected;
 		await _invRepo.UpdateAsync(invitation);
+
+		await _redisCacheService.RemoveAsync($"user:{invitation.InvitedEmail}:invitations");
 	}
 
 	public async Task DeleteAsync(string id)
 	{
-		bool exists = await _invRepo.ExistsAsync(id);
-		if (!exists)
-			throw new NotFoundException("Invitation not found");
+		var invitation = await _invRepo.GetByIdAsync(id)
+	?? throw new NotFoundException("Invitation not found");
 
 		await _invRepo.DeleteAsync(id);
+
+		await _redisCacheService.RemoveAsync($"user:{invitation.InvitedEmail}:invitations");
 	}
 }
