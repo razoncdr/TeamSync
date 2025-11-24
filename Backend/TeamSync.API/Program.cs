@@ -6,10 +6,12 @@ using StackExchange.Redis;
 using System.Text;
 using System.Text.Json.Serialization;
 using TeamSync.API.Middleware;
+using TeamSync.Application.Events;
 using TeamSync.Application.Interfaces.Repositories;
 using TeamSync.Application.Interfaces.Services;
 using TeamSync.Application.Services;
 using TeamSync.Infrastructure;
+using TeamSync.Infrastructure.Messaging;
 using TeamSync.Infrastructure.Repositories;
 using TeamSync.Infrastructure.Services;
 using TeamSync.Infrastructure.Settings;
@@ -42,6 +44,20 @@ builder.Services.Configure<JWTSettings>(
 
 builder.Services.Configure<MongoDBSettings>(
 	builder.Configuration.GetSection("MongoDBSettings")
+);
+
+builder.Services.Configure<RabbitMqSettings>(
+	builder.Configuration.GetSection("RabbitMq")
+);
+
+builder.Services.AddSingleton(provider =>
+{
+	var settings = builder.Configuration.GetSection("RabbitMq").Get<RabbitMqSettings>();
+	return new RabbitMqEventPublisher(settings);
+});
+
+builder.Services.AddSingleton<IEventPublisher>(provider =>
+	provider.GetRequiredService<RabbitMqEventPublisher>()
 );
 
 // Infrastructure layer DI
