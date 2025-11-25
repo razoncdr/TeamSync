@@ -158,6 +158,19 @@ namespace TeamSync.Application.Services
 
 			await _projectRepository.UpdateAsync(existing);
 
+			await _publisher.PublishAsync(
+	exchange: "teamsync.projects.exchange",
+	routingKey: "project.updated",
+	new ProjectUpdatedEvent
+	{
+		ProjectId = existing.Id,
+		NewName = dto.Name,
+		NewDescription = dto.Description,
+		UpdatedAt = DateTime.UtcNow
+	}
+);
+
+
 			// Invalidate per-project cache
 			await _redisCacheService.RemoveAsync($"project:{id}");
 

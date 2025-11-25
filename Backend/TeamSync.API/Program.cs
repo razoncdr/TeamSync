@@ -12,6 +12,7 @@ using TeamSync.Application.Interfaces.Services;
 using TeamSync.Application.Services;
 using TeamSync.Infrastructure;
 using TeamSync.Infrastructure.Messaging;
+using TeamSync.Infrastructure.Messaging.Consumers;
 using TeamSync.Infrastructure.Repositories;
 using TeamSync.Infrastructure.Services;
 using TeamSync.Infrastructure.Settings;
@@ -59,6 +60,13 @@ builder.Services.AddSingleton(provider =>
 builder.Services.AddSingleton<IEventPublisher>(provider =>
 	provider.GetRequiredService<RabbitMqEventPublisher>()
 );
+
+builder.Services.AddSingleton<RabbitMqSettings>();
+
+
+// RabbitMQ background consumers
+builder.Services.AddHostedService<ProjectCreatedConsumer>();
+builder.Services.AddHostedService<ProjectUpdatedConsumer>();
 
 // Infrastructure layer DI
 builder.Services.AddInfrastructure(builder.Configuration);
