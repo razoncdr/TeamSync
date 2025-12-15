@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
-import { AuthState } from '../../services/auth-state';
 import { CommonModule, NgIf } from '@angular/common';
 
 @Component({
@@ -22,7 +21,7 @@ export class Login {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private authState: AuthState
+    private auth: AuthService
   ) {}
 
   onSubmit(form: NgForm) {
@@ -35,7 +34,7 @@ export class Login {
     this.authService.login(dto).subscribe({
       next: (res: any) => {
         console.log(res);
-        this.authState.login(res.body.token);
+        localStorage.setItem('token', res.body.token);
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
