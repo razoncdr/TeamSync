@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { RouterOutlet, RouterLink } from '@angular/router';
 import { CommonModule, NgIf } from '@angular/common';
-import { AuthState } from './services/auth-state';
 import { Router } from '@angular/router';
+import { AuthService } from './services/auth';
 
 @Component({
   selector: 'app-root',
@@ -12,7 +12,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./app.css']
 })
 export class AppComponent {
-  constructor(public auth: AuthState, private router: Router) {}
+  constructor(public auth: AuthService, private router: Router) {}
 
   logout() {
     this.auth.logout();

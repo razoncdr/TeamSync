@@ -26,4 +26,10 @@ export class AuthService {
   login(dto: LoginDto): Observable<any> {
     return this.http.post(`${this.apiUrl}/login`, dto, { observe: 'response' });
   }
+  logout(): void {
+    localStorage.removeItem('token');
+  }
+  isLoggedIn(): boolean {
+    return localStorage.getItem('token') !== null;
+  }
 }
