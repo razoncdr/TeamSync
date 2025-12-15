@@ -1,5 +1,6 @@
 ﻿using TeamSync.Application.Common.Exceptions;
 using TeamSync.Application.DTOs.Project;
+using TeamSync.Application.Events;
 using TeamSync.Application.Interfaces.Repositories;
 using TeamSync.Application.Interfaces.Services;
 using TeamSync.Domain.Entities;
@@ -13,17 +14,21 @@ namespace TeamSync.Application.Services
 		private readonly ITaskRepository _taskRepository;
 		private readonly IProjectMemberRepository _memberRepository;
 		private readonly IRedisCacheService _redisCacheService;
+		private readonly IEventPublisher _publisher;
 
 		public ProjectService(
 			IProjectRepository projectRepository,
 			ITaskRepository taskRepository,
 			IProjectMemberRepository memberRepository,
-			IRedisCacheService redisCacheService)
+			IRedisCacheService redisCacheService, 
+			IEventPublisher publisher
+			)
 		{
 			_projectRepository = projectRepository;
 			_taskRepository = taskRepository;
 			_memberRepository = memberRepository;
 			_redisCacheService = redisCacheService;
+			_publisher = publisher;
 		}
 
 		public async Task<List<ProjectResponseDto>> GetUserProjectsAsync(string userId)
@@ -116,6 +121,19 @@ namespace TeamSync.Application.Services
 
 			await _memberRepository.AddAsync(member);
 
+			// Publish RabbitMQ event
+			await _publisher.PublishAsync(
+				exchange: "teamsync.projects.exchange",
+				routingKey: "project.created",
+				new ProjectCreatedEvent
+				{
+					ProjectId = project.Id,
+					Name = project.Name,
+					CreatedBy = userId,
+					CreatedAt = project.CreatedAt
+				}
+			);
+
 			// Invalidate per-user project IDs cache
 			await _redisCacheService.RemoveAsync($"user:{userId}:projects");
 
@@ -139,6 +157,19 @@ namespace TeamSync.Application.Services
 			existing.UpdatedAt = DateTime.UtcNow;
 
 			await _projectRepository.UpdateAsync(existing);
+
+			await _publisher.PublishAsync(
+	exchange: "teamsync.projects.exchange",
+	routingKey: "project.updated",
+	new ProjectUpdatedEvent
+	{
+		ProjectId = existing.Id,
+		NewName = dto.Name,
+		NewDescription = dto.Description,
+		UpdatedAt = DateTime.UtcNow
+	}
+);
+
 
 			// Invalidate per-project cache
 			await _redisCacheService.RemoveAsync($"project:{id}");
