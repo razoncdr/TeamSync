@@ -1,12 +1,10 @@
-﻿using TeamSync.Application.DTOs;
+﻿using Microsoft.AspNetCore.Mvc;
+using TeamSync.Application.DTOs;
 using TeamSync.Application.Interfaces.Services;
-using TeamSync.Domain.Entities;
-using Microsoft.AspNetCore.Identity.Data;
-using Microsoft.AspNetCore.Mvc;
 
 namespace TeamSync.API.Controllers
 {
-    [ApiController]
+	[ApiController]
 	[Route("api/[controller]")]
 	public class AuthController : ControllerBase
 	{
@@ -16,20 +14,18 @@ namespace TeamSync.API.Controllers
 			_authService = authService;
 		}
 
-
-		[HttpGet]
-		public IActionResult Index()
+		[HttpPost("register")]
+		public async Task<IActionResult> Register([FromBody] RegisterUserDto dto)
 		{
-			return Ok("Good");
+			var user = await _authService.RegisterAsync(dto);
+			return Ok(new { success = true, message = "Registration Successful", user });
 		}
 
-		[HttpPost("register")]
-		public async Task<IActionResult> Register([FromBody] RegisterUserDto userInfo)
+		[HttpPost("login")]
+		public async Task<IActionResult> Login([FromBody] LoginUserDto dto)
 		{
-			Console.WriteLine(userInfo);
-			var user = await _authService.RegisterAsync(userInfo);
-			return Ok(new { success = true, message = "Registration Successful", newUser = user });
+			var token = await _authService.LoginAsync(dto);
+			return Ok(new { success = true, token });
 		}
 	}
 }
-

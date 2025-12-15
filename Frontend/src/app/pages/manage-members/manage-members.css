@@ -1,0 +1,77 @@
+.members-container {
+  padding: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+th,
+td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.remove-btn {
+  background: #ff4444;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.remove-btn:hover {
+  background: #cc0000;
+}
+
+.back-btn {
+  background: #ddd;
+  padding: 6px 10px;
+  margin-bottom: 15px;
+}
+.badge-owner {
+  background: gold;
+  color: black;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.badge-admin {
+  background: lightblue;
+  color: black;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.badge-editor {
+  background: lightgray;
+  color: black;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.badge-viewer {
+  background: lightgreen;
+  color: black;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.badge-pending {
+  background-color: #ffcc00;
+  padding: 4px 10px;
+  border-radius: 4px;
+  color: black;
+}
+
+.badge-accepted {
+  background-color: #4caf50;
+  padding: 4px 10px;
+  border-radius: 4px;
+  color: white;
+}
+
+.badge-rejected {
+  background-color: #f44336;
+  padding: 4px 10px;
+  border-radius: 4px;
+  color: white;
+}

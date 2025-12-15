@@ -1,0 +1,123 @@
+<div class="project-dashboard-container">
+  <div class="header">
+    <h2>{{ projectName || 'Project Dashboard' }}</h2>
+    <button class="add-btn" (click)="openModal()">+ Add Task</button>
+  </div>
+
+  <!-- Task Table -->
+  <table class="task-table" *ngIf="tasks.length > 0; else emptyState">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Due Date</th>
+        <th>Assigned To</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let task of tasks">
+        <td>{{ task.title }}</td>
+        <td>
+          <span [class]="'status ' + task.status">
+            {{ task.status }}
+          </span>
+        </td>
+        <td>{{ task.dueDate | date : 'mediumDate' }}</td>
+        <td>
+          <span *ngFor="let member of task.assignedMembers" class="member">
+            {{ member.name }}
+          </span>
+        </td>
+        <td>
+          <button (click)="openModal(task)">✏️ Edit</button>
+          <button class="delete" (click)="confirmDelete(task.id)">🗑️ Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ng-template #emptyState>
+    <p class="empty">No tasks yet. Click “+ Add Task” to create one.</p>
+  </ng-template>
+
+  <!-- Task Modal -->
+  <div class="modal-backdrop" *ngIf="showModal">
+    <div class="modal">
+      <h3>{{ editingTask ? 'Edit Task' : 'Create Task' }}</h3>
+
+      <form #taskFormRef="ngForm" (ngSubmit)="saveTask(taskFormRef)" novalidate>
+        <!-- TITLE -->
+        <label> Task Title <span class="required">*</span> </label>
+        <input
+          [(ngModel)]="taskForm.title"
+          name="title"
+          required
+          maxlength="100"
+          #titleRef="ngModel"
+          placeholder="Task title"
+        />
+
+        <div class="error" *ngIf="titleRef.invalid && titleRef.touched">
+          <small *ngIf="titleRef.errors?.['required']">Title is required</small>
+          <small *ngIf="titleRef.errors?.['maxlength']">Title must be ≤ 100 characters</small>
+        </div>
+
+        <!-- DESCRIPTION -->
+        <label>Description</label>
+        <textarea
+          [(ngModel)]="taskForm.description"
+          name="description"
+          maxlength="1000"
+          #descRef="ngModel"
+          placeholder="Description"
+          rows="3"
+        ></textarea>
+
+        <div class="error" *ngIf="descRef.invalid && descRef.touched">
+          <small *ngIf="descRef.errors?.['maxlength']">
+            Description must be ≤ 1000 characters
+          </small>
+        </div>
+
+        <!-- DUE DATE -->
+        <label> Due Date <span class="required">*</span> </label>
+        <input
+          type="date"
+          [(ngModel)]="taskForm.dueDate"
+          name="dueDate"
+          required
+          #dueRef="ngModel"
+        />
+
+        <div class="error" *ngIf="dueRef.invalid && dueRef.touched">
+          <small *ngIf="dueRef.errors?.['required']">Due date is required</small>
+        </div>
+
+        <!-- STATUS -->
+        <label> Status </label>
+        <select [(ngModel)]="taskForm.status" name="status" required #statusRef="ngModel">
+          <option value="Todo">Todo</option>
+          <option value="InProgress">In Progress</option>
+          <option value="Completed">Completed</option>
+          <option value="Paused">Paused</option>
+        </select>
+
+        <!-- ASSIGNED MEMBERS -->
+        <label>Assigned Members</label>
+        <select multiple [(ngModel)]="taskForm.assignedMemberIds" name="assignedMemberIds">
+          <option *ngFor="let member of projectMembers" [value]="member.id">
+            {{ member.name }}
+          </option>
+        </select>
+
+        <div class="modal-actions">
+          <button type="submit" [disabled]="taskFormRef.invalid">
+            {{ editingTask ? 'Update' : 'Create' }}
+          </button>
+          <button type="button" class="cancel" (click)="closeModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

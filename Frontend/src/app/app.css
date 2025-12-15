@@ -1,0 +1,58 @@
+/* Navbar container */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 26px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e5e5;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Brand */
+.brand {
+  font-size: 22px;
+  font-weight: bold;
+  color: #0077ff;
+  text-decoration: none;
+}
+
+/* Right side container */
+.nav-right {
+  display: flex;
+  gap: 16px;
+}
+
+/* Navigation buttons */
+.nav-btn {
+  padding: 8px 14px;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: 0.2s;
+  border: 1px solid transparent;
+}
+
+.nav-btn:hover {
+  background: #f2f6ff;
+  border-color: #cfe0ff;
+}
+
+/* Logout button style */
+.logout {
+  color: #d9534f;
+}
+
+.logout:hover {
+  background: #fff2f2;
+  border-color: #f5c2c0;
+}
+
+/* Main content */
+.main-container {
+  padding: 24px;
+}
