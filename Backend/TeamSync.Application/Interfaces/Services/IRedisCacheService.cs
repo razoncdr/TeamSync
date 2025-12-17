@@ -10,7 +10,8 @@ namespace TeamSync.Application.Interfaces.Services
 	{
 		Task SetAsync<T>(string key, T value, TimeSpan? expiry = null);
 		Task<T?> GetAsync<T>(string key);
-		Task RemoveAsync(string key);
+		Task<Dictionary<string, T>> GetManyAsync<T>(IEnumerable<string> keys);
+        Task RemoveAsync(string key);
 	}
 
 }

@@ -19,7 +19,7 @@ public class ProjectCreatedConsumer : RabbitMqConsumerBase
 		var evt = JsonSerializer.Deserialize<ProjectCreatedEvent>(json);
 
 		// Example: clear Redis related to the user
-		await _redis.RemoveAsync($"user:{evt.CreatedBy}:projects");
+		await _redis.RemoveAsync($"user:{evt.CreatedBy}:projectIds");
 
 		Console.WriteLine($"[ProjectCreatedConsumer] Processed event for {evt.ProjectId}");
 	}
