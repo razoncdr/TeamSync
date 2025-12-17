@@ -40,7 +40,40 @@ namespace TeamSync.Application.Services
 			return JsonSerializer.Deserialize<T>(json!);
 		}
 
-		public async Task RemoveAsync(string key)
+        public async Task<Dictionary<string, T>> GetManyAsync<T>(
+    IEnumerable<string> keys)
+        {
+            var db = _redis.GetDatabase();
+
+            var redisKeys = keys
+                .Select(k => (RedisKey)k)
+                .ToArray();
+
+            if (redisKeys.Length == 0)
+                return new Dictionary<string, T>();
+
+            RedisValue[] values = await db.StringGetAsync(redisKeys);
+
+            var result = new Dictionary<string, T>();
+
+            for (int i = 0; i < redisKeys.Length; i++)
+            {
+                if (!values[i].IsNullOrEmpty)
+                {
+                    var value = JsonSerializer.Deserialize<T>(values[i]!);
+                    if (value != null)
+                    {
+                        result[redisKeys[i]!] = value;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+
+
+        public async Task RemoveAsync(string key)
 		{
 			var db = _redis.GetDatabase();
 			await db.KeyDeleteAsync(key);

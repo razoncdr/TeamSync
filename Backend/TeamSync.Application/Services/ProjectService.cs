@@ -31,50 +31,52 @@ namespace TeamSync.Application.Services
 			_publisher = publisher;
 		}
 
-		public async Task<List<ProjectResponseDto>> GetUserProjectsAsync(string userId)
-		{
-			var idsCacheKey = $"user:{userId}:projectIds";
-			var projectIds = await _redisCacheService.GetAsync<List<string>>(idsCacheKey);
+        public async Task<List<ProjectResponseDto>> GetUserProjectsAsync(string userId)
+        {
+            var idsCacheKey = $"user:{userId}:projectIds";
+            var projectIds = await _redisCacheService.GetAsync<List<string>>(idsCacheKey);
 
-			if (projectIds == null)
-			{
-				// Cache miss → get project IDs from membership table
-				var memberships = await _memberRepository.GetAllByUserIdAsync(userId);
-				if (memberships == null || !memberships.Any())
-					return new List<ProjectResponseDto>();
+            if (projectIds == null)
+            {
+                var memberships = await _memberRepository.GetAllByUserIdAsync(userId);
+                if (!memberships.Any()) return new();
 
-				projectIds = memberships.Select(m => m.ProjectId).ToList();
-				await _redisCacheService.SetAsync(idsCacheKey, projectIds, TimeSpan.FromMinutes(30));
-			}
+                projectIds = memberships.Select(m => m.ProjectId).ToList();
+                await _redisCacheService.SetAsync(idsCacheKey, projectIds, TimeSpan.FromMinutes(30));
+            }
 
-			// Fetch projects in parallel using per-project cache
-			var projectTasks = projectIds.Select(async id =>
-			{
-				var projectCacheKey = $"project:{id}";
-				var cachedProject = await _redisCacheService.GetAsync<ProjectResponseDto>(projectCacheKey);
-				if (cachedProject != null) return cachedProject;
+            var cacheKeys = projectIds.ToDictionary(id => id, id => $"project:{id}");
 
-				var project = await _projectRepository.GetByIdAsync(id);
-				if (project == null) return null;
+            var cached = await _redisCacheService
+                .GetManyAsync<ProjectResponseDto>(cacheKeys.Values);
 
-				var dto = new ProjectResponseDto
-				{
-					Id = project.Id,
-					Name = project.Name,
-					Description = project.Description,
-					OwnerId = project.OwnerId,
-					CreatedAt = project.CreatedAt
-				};
+            var missingIds = cacheKeys
+                .Where(kvp => !cached.ContainsKey(kvp.Value))
+                .Select(kvp => kvp.Key)
+                .ToList();
 
-				await _redisCacheService.SetAsync(projectCacheKey, dto, TimeSpan.FromMinutes(30));
-				return dto;
-			});
+            var dbProjects = missingIds.Any()
+                ? await _projectRepository.GetAllByIdsAsync(missingIds)
+                : new List<Project>();
 
-			var projectDtos = (await Task.WhenAll(projectTasks)).Where(p => p != null).ToList();
-			return projectDtos;
-		}
+            var dbDtos = dbProjects.Select(p => new ProjectResponseDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                OwnerId = p.OwnerId,
+                CreatedAt = p.CreatedAt
+            }).ToList();
 
-		public async Task<ProjectResponseDto> GetProjectByIdAsync(string id)
+            foreach (var dto in dbDtos)
+            {
+                await _redisCacheService.SetAsync($"project:{dto.Id}", dto, TimeSpan.FromMinutes(30));
+            }
+
+            return cached.Values.Concat(dbDtos).ToList();
+        }
+
+        public async Task<ProjectResponseDto> GetProjectByIdAsync(string id)
 		{
 			var projectCacheKey = $"project:{id}";
 			var cachedProject = await _redisCacheService.GetAsync<ProjectResponseDto>(projectCacheKey);
