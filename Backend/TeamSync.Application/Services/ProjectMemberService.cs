@@ -23,7 +23,7 @@ public class ProjectMemberService : IProjectMemberService
 		return members.Select(m => new ProjectMemberDto
 		{
 			UserId = m.UserId,
-			Role = m.Role,
+            Role = m.Role,
 			JoinedAt = m.JoinedAt
 		}).ToList();
 	}

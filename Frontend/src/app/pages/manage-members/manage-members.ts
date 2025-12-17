@@ -4,6 +4,7 @@ import { MemberService } from '../../services/member';
 import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InvitationService } from '../../services/invitation';
+import { ProjectService } from '../../services/project';
 
 @Component({
   selector: 'app-manage-members',
@@ -13,6 +14,7 @@ import { InvitationService } from '../../services/invitation';
 })
 export class ManageMembersComponent implements OnInit {
   projectId!: string;
+  projectName: string = '';
   members: any[] = [];
   loading = true;
 
@@ -26,15 +28,28 @@ export class ManageMembersComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private memberService: MemberService,
-    private invitationService: InvitationService
+    private invitationService: InvitationService,
+    private projectService: ProjectService
   ) {}
 
   ngOnInit(): void {
     this.projectId = this.route.snapshot.params['projectId'];
+    this.loadProject();
     this.loadMembers();
     this.loadInvitations();
   }
 
+  loadProject() {
+    this.projectService.getProjectById(this.projectId).subscribe({
+      next: (res) => {
+        // get project name
+        this.projectName = res.data?.name || '';
+      }
+    });
+  }
+
+
+  // load members with name and email
   loadMembers() {
     this.loading = true;
     this.memberService.getMembers(this.projectId).subscribe({

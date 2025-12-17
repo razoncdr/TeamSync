@@ -1,0 +1,30 @@
+<div class="project-dashboard-container">
+  <div class="header">
+    <h2>Team Chat</h2>
+
+    <div class="chat-input">
+      <input
+        type="text"
+        #messageInput
+        placeholder="Type a message..."
+      />
+      <button class="add-btn" (click)="sendMessage(messageInput)">
+        Send
+      </button>
+    </div>
+  </div>
+
+  <div class="chat-container" *ngIf="messages.length > 0; else emptyChat">
+    <div class="chat-message" *ngFor="let msg of messages">
+      <b>{{ msg.senderName }}:</b>
+      <span>{{ msg.message }}</span>
+      <small class="time">
+        {{ msg.createdAt | date:'shortTime' }}
+      </small>
+    </div>
+  </div>
+
+  <ng-template #emptyChat>
+    <p class="empty">No messages yet. Start the conversation 👋</p>
+  </ng-template>
+</div>

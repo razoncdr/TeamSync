@@ -1,5 +1,6 @@
+
 <div class="members-container">
-  <h2>Project Members</h2>
+  <h2>Project Members - {{ projectName }}</h2>
 
   <!-- <button class="back-btn" routerLink="/dashboard">⬅ Back</button> -->
 
@@ -9,6 +10,7 @@
   <table *ngIf="!loading">
     <tr>
       <th>User ID</th>
+      <th>Email</th>
       <th>Role</th>
       <th>Joined</th>
       <th>Action</th>
@@ -16,6 +18,7 @@
 
     <tr *ngFor="let m of members">
       <td>{{ m.userId }}</td>
+      <td>{{ m.email }}</td>
       <td>
         <span
           [ngClass]="{

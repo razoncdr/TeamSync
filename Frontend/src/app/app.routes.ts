@@ -6,6 +6,7 @@ import { ProjectDashboard } from './pages/project-dashboard/project-dashboard';
 import { Home } from './pages/home/home';
 import { ManageMembersComponent } from './pages/manage-members/manage-members';
 import { MyInvitations } from './pages/my-invitations/my-invitations';
+import { ChatComponent } from './pages/chat/chat';
 
 export const routes: Routes = [
   { path: '', component: Home },
@@ -14,5 +15,6 @@ export const routes: Routes = [
   { path: 'dashboard', component: Dashboard },
   { path: 'project/:id', component: ProjectDashboard }, 
   { path: 'projects/:projectId/members', component: ManageMembersComponent },
+  { path: 'projects/:projectId/chat', component: ChatComponent },
   { path: 'my-invitations', component: MyInvitations },
 ];

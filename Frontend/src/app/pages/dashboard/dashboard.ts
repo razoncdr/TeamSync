@@ -78,4 +78,7 @@ export class Dashboard implements OnInit {
   manageMembers(id: string) {
     this.router.navigate([`/projects/${id}/members`]);
   }
+  manageChat(id: string) {
+    this.router.navigate([`/projects/${id}/chat`]);
+  }
 }
