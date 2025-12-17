@@ -33,7 +33,7 @@ namespace TeamSync.Application.Services
 
 		public async Task<List<ProjectResponseDto>> GetUserProjectsAsync(string userId)
 		{
-			var idsCacheKey = $"user:{userId}:projects";
+			var idsCacheKey = $"user:{userId}:projectIds";
 			var projectIds = await _redisCacheService.GetAsync<List<string>>(idsCacheKey);
 
 			if (projectIds == null)
@@ -135,7 +135,7 @@ namespace TeamSync.Application.Services
 			);
 
 			// Invalidate per-user project IDs cache
-			await _redisCacheService.RemoveAsync($"user:{userId}:projects");
+			await _redisCacheService.RemoveAsync($"user:{userId}:projectIds");
 
 			return new ProjectResponseDto
 			{
@@ -177,7 +177,7 @@ namespace TeamSync.Application.Services
 			// Invalidate all member project IDs cache
 			var members = await _memberRepository.GetAllByProjectAsync(id);
 			await Task.WhenAll(members.Select(m =>
-				_redisCacheService.RemoveAsync($"user:{m.UserId}:projects")));
+				_redisCacheService.RemoveAsync($"user:{m.UserId}:projectIds")));
 		}
 
 		public async Task DeleteProjectAsync(string id)
@@ -188,7 +188,7 @@ namespace TeamSync.Application.Services
 
 			var members = await _memberRepository.GetAllByProjectAsync(id);
 			await Task.WhenAll(members.Select(m =>
-				_redisCacheService.RemoveAsync($"user:{m.UserId}:projects")));
+				_redisCacheService.RemoveAsync($"user:{m.UserId}:projectIds")));
 
 			// Remove project cache
 			await _redisCacheService.RemoveAsync($"project:{id}");
