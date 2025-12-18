@@ -24,9 +24,11 @@ namespace TeamSync.API.Controllers
 
         // GET: /api/projects/{projectId}/chat
         [HttpGet]
-        public async Task<IActionResult> GetChats(string projectId)
+        public async Task<IActionResult> GetChats(string projectId,
+            [FromQuery] int skip = 0,
+            [FromQuery] int limit = 20)
         {
-            var chats = await _chatService.GetProjectChatsAsync(projectId);
+            var chats = await _chatService.GetProjectChatsAsync(projectId, skip, limit);
 
             return Ok(new
             {

@@ -9,6 +9,7 @@ export interface ApiResponse<T> {
 
 export interface ChatMessage {
   id: string;
+  senderId: string;
   senderName: string;
   message: string;
   createdAt: string;
@@ -32,12 +33,17 @@ export class ChatService {
   }
 
   // GET: /api/projects/{projectId}/chat
-  getChatMessages(projectId: string): Observable<ApiResponse<ChatMessage[]>> {
-    return this.http.get<ApiResponse<ChatMessage[]>>(
-      `${this.baseUrl}/${projectId}/chat`,
-      this.getAuthHeaders()
-    );
-  }
+  getChatMessages(
+  projectId: string,
+  skip = 0,
+  limit = 20
+): Observable<ApiResponse<ChatMessage[]>> {
+  return this.http.get<ApiResponse<ChatMessage[]>>(
+    `${this.baseUrl}/${projectId}/chat?skip=${skip}&limit=${limit}`,
+    this.getAuthHeaders()
+  );
+}
+
 
   // POST: /api/projects/{projectId}/chat
   sendMessage(

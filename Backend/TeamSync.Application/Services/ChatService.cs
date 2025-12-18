@@ -21,9 +21,10 @@ namespace TeamSync.Application.Services
 			_chatNotifier = chatNotifier;
         }
 
-        public async Task<List<ChatMessage>> GetProjectChatsAsync(string projectId)
+        public async Task<List<ChatMessage>> GetProjectChatsAsync(string projectId, int skip, int limit)
         {
-			var chats = await _chatRepository.GetByProjectIdAsync(projectId);
+			var chats = await _chatRepository.GetPaginatedByProjectIdAsync(projectId, skip, limit);
+            chats.Reverse();
 			return chats;
         }
 
@@ -43,6 +44,7 @@ namespace TeamSync.Application.Services
                 new
                 {
                     id = chatMessage.Id,
+                    senderId = chatMessage.SenderId,
                     senderName = chatMessage.SenderName,
                     message = chatMessage.Message,
                     createdAt = chatMessage.CreatedAt
