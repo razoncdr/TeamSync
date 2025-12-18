@@ -28,7 +28,7 @@ namespace TeamSync.API.Controllers
             [FromQuery] int skip = 0,
             [FromQuery] int limit = 20)
         {
-            var chats = await _chatService.GetProjectChatsAsync(projectId, skip, limit);
+            var chats = await _chatService.GetProjectChatsAsync(UserId, projectId, skip, limit);
 
             return Ok(new
             {

@@ -21,6 +21,9 @@ export class ProjectService {
     };
   }
 
+  isMember(projectId: string): Observable<ApiResponse<boolean>> {
+    return this.http.get<ApiResponse<boolean>>(`${this.apiUrl}/${projectId}/is-member`, this.getAuthHeaders());
+  }
   getProjects(): Observable<ApiResponse<any[]>> {
     return this.http.get<ApiResponse<any[]>>(this.apiUrl, this.getAuthHeaders());
   }

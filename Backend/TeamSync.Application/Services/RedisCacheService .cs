@@ -78,5 +78,27 @@ namespace TeamSync.Application.Services
 			var db = _redis.GetDatabase();
 			await db.KeyDeleteAsync(key);
 		}
-	}
+
+        public async Task ListRightPushAsync<T>(string key, T value)
+        {
+            var db = _redis.GetDatabase();
+            var json = JsonSerializer.Serialize(value);
+            await db.ListRightPushAsync(key, json);
+        }
+
+        public async Task ListTrimAsync(string key, long start, long stop)
+        {
+            var db = _redis.GetDatabase();
+            await db.ListTrimAsync(key, start, stop);
+        }
+        public async Task<List<T>> ListRangeAsync<T>(string key)
+        {
+            var db = _redis.GetDatabase();
+            var values = await db.ListRangeAsync(key, 0, -1);
+            return values
+                .Where(v => !v.IsNullOrEmpty)
+                .Select(v => JsonSerializer.Deserialize<T>(v)!)
+                .ToList();
+        }
+    }
 }
