@@ -5,7 +5,9 @@ using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using System.Text;
 using System.Text.Json.Serialization;
+using TeamSync.API.Hubs;
 using TeamSync.API.Middleware;
+using TeamSync.API.Realtime;
 using TeamSync.Application.Events;
 using TeamSync.Application.Interfaces.Repositories;
 using TeamSync.Application.Interfaces.Services;
@@ -21,15 +23,27 @@ Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
+//builder.Services.AddCors(options =>
+//{
+//    options.AddDefaultPolicy(policy =>
+//    {
+//        policy.WithOrigins("http://localhost:4200")
+//              .AllowAnyHeader()
+//              .AllowAnyMethod();
+//    });
+//});
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
+    options.AddPolicy("CorsPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy
+            .WithOrigins("http://localhost:4200")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
+
 
 builder.Services.AddControllers()
 	.AddJsonOptions(options =>
@@ -86,6 +100,8 @@ builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
 builder.Services.AddScoped<IProjectInvitationRepository, ProjectInvitationRepository>();
 
+builder.Services.AddScoped<IChatNotifier, SignalRChatNotifier>();
+
 var redis = ConnectionMultiplexer.Connect("localhost:6379");
 builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
 builder.Services.AddSingleton<IRedisCacheService, RedisCacheService>();
@@ -93,6 +109,8 @@ builder.Services.AddSingleton<IRedisCacheService, RedisCacheService>();
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 	ConnectionMultiplexer.Connect("localhost:6379"));
 builder.Services.AddSingleton<IRedisCacheService, RedisCacheService>();
+
+builder.Services.AddSignalR();
 
 // JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JWTSettings").Get<JWTSettings>();
@@ -146,7 +164,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
-app.UseCors();
+//app.UseCors();
+app.UseCors("CorsPolicy");
 
 
 // Swagger in Development
@@ -163,6 +182,8 @@ app.UseExceptionMiddleware();
 app.UseAuthentication();
 app.UseAuthorization();
 
+
 app.MapControllers();
+app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();

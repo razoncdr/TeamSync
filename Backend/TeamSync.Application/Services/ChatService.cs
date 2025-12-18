@@ -1,10 +1,6 @@
-﻿using TeamSync.Application.Common.Exceptions;
-using TeamSync.Application.DTOs.Project;
-using TeamSync.Application.Events;
-using TeamSync.Application.Interfaces.Repositories;
+﻿using TeamSync.Application.Interfaces.Repositories;
 using TeamSync.Application.Interfaces.Services;
 using TeamSync.Domain.Entities;
-using TeamSync.Domain.Enums;
 
 namespace TeamSync.Application.Services
 {
@@ -12,14 +8,17 @@ namespace TeamSync.Application.Services
     {
 		private readonly IChatRepository _chatRepository;
 		private readonly IUserRepository _userRepository;
+        private readonly IChatNotifier _chatNotifier;
 
         public ChatService(
 			IChatRepository chatRepository,
-			IUserRepository userRepository
-			)
+			IUserRepository userRepository,
+            IChatNotifier chatNotifier
+            )
 		{
             _chatRepository = chatRepository;
 			_userRepository = userRepository;
+			_chatNotifier = chatNotifier;
         }
 
         public async Task<List<ChatMessage>> GetProjectChatsAsync(string projectId)
@@ -39,7 +38,17 @@ namespace TeamSync.Application.Services
 				CreatedAt = DateTime.UtcNow
 			};
 			await _chatRepository.AddAsync(chatMessage);
-			return chatMessage;
+            await _chatNotifier.NotifyMessageCreatedAsync(
+                projectId,
+                new
+                {
+                    id = chatMessage.Id,
+                    senderName = chatMessage.SenderName,
+                    message = chatMessage.Message,
+                    createdAt = chatMessage.CreatedAt
+                }
+            );
+            return chatMessage;
         }
     }
 }

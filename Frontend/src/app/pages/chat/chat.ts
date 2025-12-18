@@ -3,6 +3,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ChatService, ChatMessage } from '../../services/chat';
 import { Subscription, interval } from 'rxjs';
+import { ChatHubService } from '../../services/chat-hub';
 
 @Component({
   selector: 'app-chat',
@@ -19,23 +20,23 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
-    private chatService: ChatService
+    private chatService: ChatService,
+    private chatHub: ChatHubService
   ) {}
 
   ngOnInit(): void {
     this.projectId = this.route.snapshot.paramMap.get('projectId')!;
     this.loadChat();
 
-    // TEMP polling (remove after SignalR)
-    // this.pollingSub = interval(5000).subscribe(() => {
-    //   this.loadChat();
-    // });
+    this.chatHub.start(this.projectId, (msg) => {
+      this.messages.push(msg);
+    });
   }
 
-  ngOnDestroy(): void {
-    this.pollingSub?.unsubscribe();
+  
+  ngOnDestroy() {
+    this.chatHub.stop(this.projectId);
   }
-
   loadChat(): void {
     this.chatService.getChatMessages(this.projectId).subscribe({
       next: (res) => (this.messages = res.data),
@@ -49,7 +50,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     this.chatService.sendMessage(this.projectId, text).subscribe({
       next: (res) => {
-        this.messages.push(res.data);
+        // this.messages.push(res.data);
         messageInput.value = '';
       },
       error: (err) => console.error('Failed to send message', err),
