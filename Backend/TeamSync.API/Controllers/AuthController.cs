@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TeamSync.Application.DTOs;
 using TeamSync.Application.Interfaces.Services;
 
@@ -6,7 +7,8 @@ namespace TeamSync.API.Controllers
 {
 	[ApiController]
 	[Route("api/[controller]")]
-	public class AuthController : ControllerBase
+    [AllowAnonymous]
+    public class AuthController : ControllerBase
 	{
 		private readonly IAuthService _authService;
 		public AuthController(IAuthService authService)
@@ -18,7 +20,7 @@ namespace TeamSync.API.Controllers
 		public async Task<IActionResult> Register([FromBody] RegisterUserDto dto)
 		{
 			var user = await _authService.RegisterAsync(dto);
-			return Ok(new { success = true, message = "Registration Successful", user });
+			return Ok(new { success = true, message = "Registration Successful" });
 		}
 
 		[HttpPost("login")]

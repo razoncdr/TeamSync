@@ -23,15 +23,6 @@ Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
-//builder.Services.AddCors(options =>
-//{
-//    options.AddDefaultPolicy(policy =>
-//    {
-//        policy.WithOrigins("http://localhost:4200")
-//              .AllowAnyHeader()
-//              .AllowAnyMethod();
-//    });
-//});
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>
@@ -125,9 +116,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 			ValidateIssuerSigningKey = true,
 			ValidIssuer = jwtSettings.Issuer,
 			ValidAudience = jwtSettings.Audience,
-			IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key))
+			IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
+        ClockSkew = TimeSpan.Zero
 		};
-	});
+
+
+    });
 
 // Add controllers and Swagger
 builder.Services.AddControllers();
