@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import { Routes, CanActivate } from '@angular/router';
 import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
 import { Dashboard } from './pages/dashboard/dashboard';
@@ -13,7 +13,7 @@ import { GuestGuard } from './guards/guest.guard';
 import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', component: Home },
+  { path: '', component: Home, canActivate: [GuestGuard] },
   { path: 'login', component: Login, canActivate: [GuestGuard]  },
   { path: 'register', component: Register, canActivate: [GuestGuard]  },
   { path: 'dashboard', component: Dashboard, canActivate: [AuthGuard]},

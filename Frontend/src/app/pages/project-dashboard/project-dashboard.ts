@@ -4,6 +4,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { TaskService } from '../../services/task';
 import { ProjectService } from '../../services/project';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-project-dashboard',
@@ -32,7 +33,8 @@ export class ProjectDashboard implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private taskService: TaskService,
-    private projectService: ProjectService
+    private projectService: ProjectService, 
+    private toastr: ToastrService
   ) {}
 
   ngOnInit() {
@@ -46,17 +48,15 @@ export class ProjectDashboard implements OnInit {
       next: (res) => {
         this.projectName = res.data.name;
         this.projectMembers = res.data.members || [];
-        console.log("ProjectId during loadProject: ", this.projectId);
       },
-      error: (err) => console.error('Failed to load project', err),
+      error: (err) => this.toastr.error('Failed to load project', 'Error'),
     });
   }
 
   loadTasks() {
-    console.log("ProjectId during loadTasks: ", this.projectId);
     this.taskService.getTasks(this.projectId).subscribe({
       next: (res) => (this.tasks = res.data || []),
-      error: (err) => console.error('Failed to load tasks', err),
+      error: (err) => this.toastr.error('Failed to load tasks', 'Error'),
     });
   }
 
@@ -96,18 +96,22 @@ export class ProjectDashboard implements OnInit {
 
     action.subscribe({
       next: () => {
+        this.editingTask ? this.toastr.success('Task updated successfully', 'Success') : this.toastr.success('Task created successfully', 'Success');
         this.closeModal();
         this.loadTasks();
       },
-      error: (err) => console.error('Failed to save task', err),
+      error: (err) => this.toastr.error('Failed to save task', 'Error'),
     });
   }
 
   confirmDelete(id: string) {
     if (!confirm('Are you sure you want to delete this task?')) return;
     this.taskService.deleteTask(this.projectId, id).subscribe({
-      next: () => this.loadTasks(),
-      error: (err) => console.error('Failed to delete task', err),
+      next: () => {
+        this.toastr.success('Task deleted successfully', 'Success');
+        this.loadTasks();
+      },
+      error: (err) => this.toastr.error('Failed to delete task', 'Error'),
     });
   }
 }

@@ -63,8 +63,8 @@ public class ProjectInvitationService : IProjectInvitationService
 		var member = await _memberRepo.GetByProjectAndUserAsync(projectId, userId)
 			?? throw new ForbiddenException("You are not a member of this project.");
 
-		if (member.Role != ProjectRole.Owner && member.Role != ProjectRole.Admin)
-			throw new ForbiddenException("Only Admins or Owner can view project invitations.");
+		//if (member.Role != ProjectRole.Owner && member.Role != ProjectRole.Admin)
+		//	throw new ForbiddenException("Only Admins or Owner can view project invitations.");
 
 		var invitations = await _invRepo.GetByProjectIdAsync(projectId);
 

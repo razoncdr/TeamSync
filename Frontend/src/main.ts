@@ -5,15 +5,21 @@ import { routes } from './app/app.routes';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './app/interceptors/auth.interceptor';
+// import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { provideToastr } from 'ngx-toastr';
 
 bootstrapApplication(AppComponent, {
   providers: [
+    provideAnimationsAsync(), // ✅ safer in standalone
+    provideToastr({
+      timeOut: 3000,
+      positionClass: 'toast-top-right',
+      preventDuplicates: true,
+      closeButton: true,
+    }),
     provideRouter(routes),
-
-    // REQUIRED for interceptors
     provideHttpClient(withInterceptorsFromDi()),
-
-    // Register interceptor
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
@@ -21,3 +27,4 @@ bootstrapApplication(AppComponent, {
     },
   ],
 });
+

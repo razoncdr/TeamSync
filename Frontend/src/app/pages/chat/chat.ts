@@ -3,6 +3,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ChatService, ChatMessage } from '../../services/chat';
 import { ChatHubService } from '../../services/chat-hub';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-chat',
@@ -24,7 +25,8 @@ export class ChatComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private chatService: ChatService,
-    private chatHub: ChatHubService
+    private chatHub: ChatHubService,
+    private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
@@ -51,7 +53,10 @@ export class ChatComponent implements OnInit, OnDestroy {
           this.skip += this.pageSize;
           this.hasMore = res.data.length === this.pageSize;
         },
-        error: (err) => console.error(err),
+        error: (err) => {
+          console.error(err);
+          this.toastr.error('Failed to load chat messages', 'Error');
+        }
       });
   }
 
@@ -71,6 +76,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error(err);
+          this.toastr.error('Failed to load older messages', 'Error');
           this.loadingOlder = false;
         },
       });
@@ -90,7 +96,10 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     this.chatService.sendMessage(this.projectId, text).subscribe({
       next: () => (messageInput.value = ''),
-      error: (err) => console.error(err),
+      error: (err) => {
+        console.error(err);
+        this.toastr.error('Failed to send message', 'Error');
+      },
     });
   }
 }
