@@ -76,6 +76,11 @@ namespace TeamSync.Application.Services
             return cached.Values.Concat(dbDtos).ToList();
         }
 
+		public async Task<bool> IsUserProjectMemberAsync(string projectId, string userId)
+        {
+			return await _memberRepository.ExistsByUserIdAsync(projectId, userId);
+        }
+
         public async Task<ProjectResponseDto> GetProjectByIdAsync(string id)
 		{
 			var projectCacheKey = $"project:{id}";

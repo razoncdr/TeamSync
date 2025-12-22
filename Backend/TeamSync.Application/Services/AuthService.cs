@@ -21,11 +21,6 @@ namespace TeamSync.Application.Services
 			_redisCacheService = redisCacheService;
 		}
 
-		public async Task<User?> GetByEmailAsync(string email)
-		{
-			return await _userRepository.GetByEmailAsync(email);
-		}
-
 		public async Task<User> RegisterAsync(RegisterUserDto dto)
 		{
 			var existing = await _userRepository.GetByEmailAsync(dto.Email);
@@ -46,41 +41,19 @@ namespace TeamSync.Application.Services
 			return user;
 		}
 
-		public async Task<string> LoginAsync(LoginUserDto dto)
-		{
-			// Try getting user from Redis first
-			var cacheKey = $"user:{dto.Email}";
-			var cachedUser = await _redisCacheService.GetAsync<User>(cacheKey);
+        public async Task<string> LoginAsync(LoginUserDto dto)
+        {
+            var user = await _userRepository.GetByEmailAsync(dto.Email);
+            if (user == null)
+                throw new UnauthorizedException("Invalid credentials.");
 
-			User user;
-			if (cachedUser != null)
-			{
-				Console.WriteLine("--- cache hit ---");
-				user = cachedUser;
-			}
-			else
-			{
-				Console.WriteLine("--- cache miss ---");
-				user = await _userRepository.GetByEmailAsync(dto.Email);
-				if (user == null)
-					throw new UnauthorizedException("Invalid credentials.");
+            using var hmac = new HMACSHA512(user.PasswordSalt);
+            var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(dto.Password));
 
-				using var hmac = new HMACSHA512(user.PasswordSalt);
-				var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(dto.Password));
+            if (!computedHash.SequenceEqual(user.PasswordHash))
+                throw new UnauthorizedException("Invalid credentials.");
 
-				if (!computedHash.SequenceEqual(user.PasswordHash))
-					throw new UnauthorizedException("Invalid credentials.");
-
-				// Cache user info for 30 minutes
-				await _redisCacheService.SetAsync(cacheKey, user, TimeSpan.FromMinutes(30));
-			}
-
-			return _jwtService.GenerateToken(user);
-		}
-
-		public async Task RemoveUserCacheAsync(string email)
-		{
-			await _redisCacheService.RemoveAsync($"user:{email}");
-		}
+            return _jwtService.GenerateToken(user);
+        }
 	}
 }

@@ -1,0 +1,53 @@
+.forbidden-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #b4a8a6, #74615f);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fff;
+    text-align: center;
+}
+
+.forbidden-content {
+    max-width: 500px;
+    padding: 2rem;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.forbidden-content h1 {
+    font-size: 8rem;
+    margin: 0;
+    font-weight: bold;
+}
+
+.forbidden-content h2 {
+    font-size: 2rem;
+    margin: 0.5rem 0;
+}
+
+.forbidden-content p {
+    font-size: 1.1rem;
+    margin: 1rem 0 2rem 0;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    color: #f85032;
+    background: #fff;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background: #f85032;
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+}

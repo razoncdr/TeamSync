@@ -1,0 +1,68 @@
+<div class="chat-container">
+<div class="chat-page">
+
+  <!-- Header -->
+  <div class="chat-header">
+    <h3>Team Chat</h3>
+  </div>
+
+  <!-- Chat Messages -->
+  <div class="chat-body">
+
+    <!-- Load Previous -->
+    <button
+      class="load-more"
+      *ngIf="hasMore"
+      (click)="loadPreviousMessages()"
+    >
+    {{ loadingOlder ? 'Loading...' : '⬆ Load previous messages' }}
+    </button>
+
+    <!-- Messages -->
+    <div
+      *ngFor="let msg of messages"
+      class="message-row"
+      [ngClass]="{
+        'mine': msg.senderId === currentUserId,
+        'theirs': msg.senderId !== currentUserId
+      }"
+    >
+      <div class="message-bubble">
+
+        <!-- Sender name (others only) -->
+        <div
+          class="sender-name"
+          *ngIf="msg.senderId !== currentUserId"
+        >
+          {{ msg.senderName }}
+        </div>
+
+        <!-- Message text -->
+        <div class="message-text">
+          {{ msg.message }}
+        </div>
+
+        <!-- Time -->
+        <div class="message-time">
+          {{ msg.createdAt | date:'shortTime' }}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Input -->
+  <div class="chat-input">
+    <input
+      type="text"
+      #messageInput
+      placeholder="Type a message..."
+      (keydown.enter)="sendMessage(messageInput)"
+    />
+    <button (click)="sendMessage(messageInput)">
+      Send
+    </button>
+  </div>
+
+</div>
+</div>

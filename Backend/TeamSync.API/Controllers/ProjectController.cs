@@ -36,7 +36,14 @@ namespace TeamSync.API.Controllers
 			return Ok(new { success = true, data = project });
 		}
 
-		[HttpPost]
+		[HttpGet("{id}/is-member")]
+		public async Task<IActionResult> IsMember(string id)
+		{
+			var isMember = await _projectService.IsUserProjectMemberAsync(id, UserId);
+			return Ok(new { success = true, data = isMember });
+        }
+
+        [HttpPost]
 		public async Task<IActionResult> Create([FromBody] CreateProjectDto dto)
 		{
 			var created = await _projectService.CreateProjectAsync(UserId, dto);
