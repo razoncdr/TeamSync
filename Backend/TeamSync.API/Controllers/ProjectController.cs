@@ -32,7 +32,7 @@ namespace TeamSync.API.Controllers
 		[HttpGet("{id}")]
 		public async Task<IActionResult> GetById(string id)
 		{
-			var project = await _projectService.GetProjectByIdAsync(id);
+			var project = await _projectService.GetProjectByIdAsync(id, UserId);
 			return Ok(new { success = true, data = project });
 		}
 
@@ -53,14 +53,14 @@ namespace TeamSync.API.Controllers
 		[HttpPut("{id}")]
 		public async Task<IActionResult> Update(string id, [FromBody] UpdateProjectDto dto)
 		{
-			await _projectService.UpdateProjectAsync(id, dto);
+			await _projectService.UpdateProjectAsync(id, UserId, dto);
 			return Ok(new { success = true, message = "Project updated" });
 		}
 
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> Delete(string id)
 		{
-			await _projectService.DeleteProjectAsync(id);
+			await _projectService.DeleteProjectAsync(id, UserId);
 			return Ok(new { success = true, message = "Project deleted" });
 		}
 	}

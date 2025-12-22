@@ -31,8 +31,9 @@ export class Dashboard implements OnInit {
     });
   }
 
-  goToProject(id: string) {
-    this.router.navigate(['/project', id]);
+  goToProject(projectId: string) {
+    console.log("Navigating to project with id: ", projectId);
+    this.router.navigate([`/projects/${projectId}`]);
   }
 
   openModal(project: any = null) {

@@ -26,7 +26,7 @@ namespace TeamSync.API.Controllers
 		[HttpGet]
 		public async Task<IActionResult> GetAll(string projectId)
 		{
-			var members = await _memberService.GetMembersAsync(projectId);
+			var members = await _memberService.GetMembersAsync(projectId, UserId);
 			return Ok(new { success = true, message = "Members fetched", data = members });
 		}
 

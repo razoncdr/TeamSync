@@ -15,6 +15,7 @@ export class ProjectMemberGuard implements CanActivate {
 
   canActivate(route: ActivatedRouteSnapshot): Observable<boolean> {
     const projectId = route.params['projectId'];
+    console.log("Project Id in project member guard: ", projectId);
 
     return this.projectService.isMember(projectId).pipe(
       map(res => {

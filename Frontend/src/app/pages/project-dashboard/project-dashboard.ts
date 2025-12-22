@@ -36,7 +36,7 @@ export class ProjectDashboard implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.projectId = this.route.snapshot.paramMap.get('id')!;
+    this.projectId = this.route.snapshot.paramMap.get('projectId')!;
     this.loadProject();
     this.loadTasks();
   }
@@ -46,12 +46,14 @@ export class ProjectDashboard implements OnInit {
       next: (res) => {
         this.projectName = res.data.name;
         this.projectMembers = res.data.members || [];
+        console.log("ProjectId during loadProject: ", this.projectId);
       },
       error: (err) => console.error('Failed to load project', err),
     });
   }
 
   loadTasks() {
+    console.log("ProjectId during loadTasks: ", this.projectId);
     this.taskService.getTasks(this.projectId).subscribe({
       next: (res) => (this.tasks = res.data || []),
       error: (err) => console.error('Failed to load tasks', err),
@@ -89,7 +91,7 @@ export class ProjectDashboard implements OnInit {
       return;
     }
     const action = this.editingTask
-      ? this.taskService.updateTask(this.editingTask.id, this.taskForm)
+      ? this.taskService.updateTask(this.projectId, this.editingTask.id, this.taskForm)
       : this.taskService.createTask(this.projectId, this.taskForm);
 
     action.subscribe({
@@ -103,7 +105,7 @@ export class ProjectDashboard implements OnInit {
 
   confirmDelete(id: string) {
     if (!confirm('Are you sure you want to delete this task?')) return;
-    this.taskService.deleteTask(id).subscribe({
+    this.taskService.deleteTask(this.projectId, id).subscribe({
       next: () => this.loadTasks(),
       error: (err) => console.error('Failed to delete task', err),
     });
