@@ -7,8 +7,8 @@ namespace TeamSync.Application.Interfaces.Services
 		Task<ProjectInvitationDto> InviteAsync(string projectId, InviteMemberDto dto, string invitedByUserId);
 		Task<List<ProjectInvitationDto>> GetProjectInvitationsAsync(string projectId, string userId);
 		Task<List<ProjectInvitationDto>> GetUserInvitationsAsync(string userEmail);
-		Task AcceptInvitationAsync(string invitationId, string userId);
-		Task RejectInvitationAsync(string invitationId, string userId);
-		Task DeleteAsync(string id);
+		Task AcceptInvitationAsync(string invitationId, string userId, string userEmail);
+		Task RejectInvitationAsync(string invitationId, string userId, string userEmail);
+        Task DeleteAsync(string id, string userId);
 	}
 }

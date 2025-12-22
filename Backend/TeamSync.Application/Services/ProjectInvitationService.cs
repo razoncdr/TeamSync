@@ -102,7 +102,7 @@ public class ProjectInvitationService : IProjectInvitationService
 		return dtos;
 	}
 
-	public async Task AcceptInvitationAsync(string invitationId, string userId)
+	public async Task AcceptInvitationAsync(string invitationId, string userId, string userEmail)
 	{
 		var invitation = await _invRepo.GetByIdAsync(invitationId)
 			?? throw new NotFoundException("Invitation not found.");
@@ -110,7 +110,14 @@ public class ProjectInvitationService : IProjectInvitationService
 		if (invitation.Status != InvitationStatus.Pending)
 			throw new ConflictException("Invitation already processed.");
 
-		invitation.InvitedUserId = userId;
+		if(await _memberRepo.ExistsByUserIdAsync(invitation.ProjectId, userId))
+			throw new ConflictException("You are already a member of this project.");
+
+        if (!string.Equals(invitation.InvitedEmail, userEmail, StringComparison.OrdinalIgnoreCase))
+            throw new ForbiddenException("This invitation was not sent to you.");
+
+
+        invitation.InvitedUserId = userId;
 		invitation.Status = InvitationStatus.Accepted;
 		await _invRepo.UpdateAsync(invitation);
 
@@ -125,10 +132,10 @@ public class ProjectInvitationService : IProjectInvitationService
 		await _memberRepo.AddAsync(member);
 
 		await _redisCacheService.RemoveAsync($"user:{invitation.InvitedEmail}:invitations");
-		await _redisCacheService.RemoveAsync($"user:{userId}:projects");
+		await _redisCacheService.RemoveAsync($"user:{userId}:projectIds");
 	}
 
-	public async Task RejectInvitationAsync(string invitationId, string userId)
+	public async Task RejectInvitationAsync(string invitationId, string userId, string userEmail)
 	{
 		var invitation = await _invRepo.GetByIdAsync(invitationId)
 			?? throw new NotFoundException("Invitation not found.");
@@ -136,18 +143,30 @@ public class ProjectInvitationService : IProjectInvitationService
 		if (invitation.Status != InvitationStatus.Pending)
 			throw new ConflictException("Invitation already processed.");
 
-		invitation.Status = InvitationStatus.Rejected;
+        if (!string.Equals(invitation.InvitedEmail, userEmail, StringComparison.OrdinalIgnoreCase))
+            throw new ForbiddenException("This invitation was not sent to you.");
+
+        invitation.Status = InvitationStatus.Rejected;
 		await _invRepo.UpdateAsync(invitation);
 
 		await _redisCacheService.RemoveAsync($"user:{invitation.InvitedEmail}:invitations");
 	}
 
-	public async Task DeleteAsync(string id)
+	public async Task DeleteAsync(string id, string userId)
 	{
+
 		var invitation = await _invRepo.GetByIdAsync(id)
 	?? throw new NotFoundException("Invitation not found");
 
-		await _invRepo.DeleteAsync(id);
+        var member = await _memberRepo.GetByProjectAndUserAsync(invitation.ProjectId, userId)
+        ?? throw new ForbiddenException("You are not a member of this project.");
+
+        if (member.Role != ProjectRole.Owner &&
+            member.Role != ProjectRole.Admin &&
+            invitation.InvitedByUserId != userId)
+            throw new ForbiddenException("You are not allowed to delete this invitation.");
+
+        await _invRepo.DeleteAsync(id);
 
 		await _redisCacheService.RemoveAsync($"user:{invitation.InvitedEmail}:invitations");
 	}

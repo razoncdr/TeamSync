@@ -17,9 +17,12 @@ public class ProjectMemberService : IProjectMemberService
 		_redisCacheService = redisCacheService;
 	}
 
-	public async Task<List<ProjectMemberDto>> GetMembersAsync(string projectId)
+	public async Task<List<ProjectMemberDto>> GetMembersAsync(string projectId, string currentUserId)
 	{
-		var members = await _memberRepo.GetAllByProjectAsync(projectId);
+        var currentUser = await _memberRepo.GetByProjectAndUserAsync(projectId, currentUserId)
+    ?? throw new ForbiddenException("You are not a member of this project.");
+
+        var members = await _memberRepo.GetAllByProjectAsync(projectId);
 		return members.Select(m => new ProjectMemberDto
 		{
 			UserId = m.UserId,

@@ -10,7 +10,7 @@ interface ApiResponse<T> {
 
 @Injectable({ providedIn: 'root' })
 export class TaskService {
-  private apiUrl = 'https://localhost:7035/api/Task';
+  private apiUrl = (projectId: string) => `https://localhost:7035/api/projects/${projectId}/tasks`;
 
   constructor(private http: HttpClient) {}
 
@@ -22,26 +22,36 @@ export class TaskService {
   }
 
   getTasks(projectId: string): Observable<ApiResponse<any[]>> {
-    console.log(`${this.apiUrl}?projectId=${projectId}`);
+    // GET https://localhost:7035/api/projects/{projectId}/tasks
     return this.http.get<ApiResponse<any[]>>(
-      `${this.apiUrl}?projectId=${projectId}`,
+      `${this.apiUrl(projectId)}`,
       this.getAuthHeaders()
     );
   }
 
   createTask(projectId: string, data: any): Observable<ApiResponse<any>> {
+    // POST https://localhost:7035/api/projects/{projectId}/tasks
     return this.http.post<ApiResponse<any>>(
-      `${this.apiUrl}/${projectId}`,
+      `${this.apiUrl(projectId)}`,
       data,
       this.getAuthHeaders()
     );
   }
 
-  updateTask(id: string, data: any): Observable<ApiResponse<any>> {
-    return this.http.put<ApiResponse<any>>(`${this.apiUrl}/${id}`, data, this.getAuthHeaders());
+  updateTask(projectId: string, id: string, data: any): Observable<ApiResponse<any>> {
+    // PUT https://localhost:7035/api/projects/{projectId}/tasks/{id}
+    return this.http.put<ApiResponse<any>>(
+      `${this.apiUrl(projectId)}/${id}`,
+      data,
+      this.getAuthHeaders()
+    );
   }
 
-  deleteTask(id: string): Observable<ApiResponse<any>> {
-    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/${id}`, this.getAuthHeaders());
+  deleteTask(projectId: string, id: string): Observable<ApiResponse<any>> {
+    // DELETE https://localhost:7035/api/projects/{projectId}/tasks/{id}
+    return this.http.delete<ApiResponse<any>>(
+      `${this.apiUrl(projectId)}/${id}`,
+      this.getAuthHeaders()
+    );
   }
 }

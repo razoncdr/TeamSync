@@ -1,6 +1,8 @@
-﻿using TeamSync.Application.Common.Exceptions;
+﻿using Pipelines.Sockets.Unofficial.Arenas;
+using TeamSync.Application.Common.Exceptions;
 using TeamSync.Application.DTOs.Project;
 using TeamSync.Application.Events;
+using TeamSync.Application.Exceptions;
 using TeamSync.Application.Interfaces.Repositories;
 using TeamSync.Application.Interfaces.Services;
 using TeamSync.Domain.Entities;
@@ -81,9 +83,18 @@ namespace TeamSync.Application.Services
 			return await _memberRepository.ExistsByUserIdAsync(projectId, userId);
         }
 
-        public async Task<ProjectResponseDto> GetProjectByIdAsync(string id)
+        private async Task EnsureProjectMemberAsync(string projectId, string userId)
+        {
+            var isMember = await _memberRepository.ExistsByUserIdAsync(projectId, userId);
+            if (!isMember)
+                throw new ForbiddenException("You are not a member of this project.");
+        }
+
+
+        public async Task<ProjectResponseDto> GetProjectByIdAsync(string id, string UserId)
 		{
-			var projectCacheKey = $"project:{id}";
+            await EnsureProjectMemberAsync(id, UserId);
+            var projectCacheKey = $"project:{id}";
 			var cachedProject = await _redisCacheService.GetAsync<ProjectResponseDto>(projectCacheKey);
 			if (cachedProject != null) return cachedProject;
 
@@ -154,9 +165,10 @@ namespace TeamSync.Application.Services
 			};
 		}
 
-		public async Task UpdateProjectAsync(string id, UpdateProjectDto dto)
+		public async Task UpdateProjectAsync(string id, string UserId, UpdateProjectDto dto)
 		{
-			var existing = await _projectRepository.GetByIdAsync(id)
+            await EnsureProjectMemberAsync(id, UserId);
+            var existing = await _projectRepository.GetByIdAsync(id)
 						  ?? throw new NotFoundException("Project not found");
 
 			existing.Name = dto.Name;
@@ -187,9 +199,10 @@ namespace TeamSync.Application.Services
 				_redisCacheService.RemoveAsync($"user:{m.UserId}:projectIds")));
 		}
 
-		public async Task DeleteProjectAsync(string id)
+		public async Task DeleteProjectAsync(string id, string UserId)
 		{
-			bool exists = await _projectRepository.ExistsAsync(id);
+            await EnsureProjectMemberAsync(id, UserId);
+            bool exists = await _projectRepository.ExistsAsync(id);
 			if (!exists)
 				throw new NotFoundException("Project not found");
 

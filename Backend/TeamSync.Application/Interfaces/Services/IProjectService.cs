@@ -7,9 +7,9 @@ namespace TeamSync.Application.Interfaces.Services
 	{
 		Task<List<ProjectResponseDto>> GetUserProjectsAsync(string userId);
 		Task<bool> IsUserProjectMemberAsync(string projectId, string userId);
-        Task<ProjectResponseDto> GetProjectByIdAsync(string id);
+        Task<ProjectResponseDto> GetProjectByIdAsync(string id, string UserId);
 		Task<ProjectResponseDto> CreateProjectAsync(string userId, CreateProjectDto dto);
-		Task UpdateProjectAsync(string id, UpdateProjectDto dto);
-		Task DeleteProjectAsync(string id);
+		Task UpdateProjectAsync(string id, string UserId, UpdateProjectDto dto);
+		Task DeleteProjectAsync(string id, string UserId);
 	}
 }

@@ -28,7 +28,6 @@ namespace TeamSync.API.Controllers
 		[HttpGet("project/{projectId}")]
 		public async Task<IActionResult> GetProjectInvitations(string projectId)
 		{
-			Console.WriteLine("Came here");
 			var invitations = await _invitationService.GetProjectInvitationsAsync(projectId, UserId);
 			return Ok(new { success = true, message = "Project invitations fetched", data = invitations });
 		}
@@ -41,21 +40,21 @@ namespace TeamSync.API.Controllers
 		[HttpPost("{invitationId}/accept")]
 		public async Task<IActionResult> Accept(string invitationId)
 		{
-			await _invitationService.AcceptInvitationAsync(invitationId, UserId);
+			await _invitationService.AcceptInvitationAsync(invitationId, UserId, UserEmail);
 			return Ok(new { success = true, message = "Invitation accepted" });
 		}
 
 		[HttpPost("{invitationId}/reject")]
 		public async Task<IActionResult> Reject(string invitationId)
 		{
-			await _invitationService.RejectInvitationAsync(invitationId, UserId);
-			return Ok(new { success = true, message = "Invitation rejected" });
+			await _invitationService.RejectInvitationAsync(invitationId, UserId, UserEmail);
+            return Ok(new { success = true, message = "Invitation rejected" });
 		}
 
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> DeleteInvitation(string id)
 		{
-			await _invitationService.DeleteAsync(id);
+			await _invitationService.DeleteAsync(id, UserId);
 			return Ok(new { success = true, message = "Project deleted" });
 		}
 	}
