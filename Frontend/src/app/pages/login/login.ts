@@ -3,6 +3,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { CommonModule, NgIf } from '@angular/common';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-login',
@@ -17,15 +18,18 @@ export class Login {
 
   showPassword = false;
   submitted = false;
+  isLoading = false;
 
   constructor(
     private authService: AuthService,
     private router: Router,
-    private auth: AuthService
+    private auth: AuthService, 
+    private toastr: ToastrService
   ) {}
 
   onSubmit(form: NgForm) {
     this.submitted = true;
+    this.isLoading = true;
 
     if (form.invalid) return;
 
@@ -33,13 +37,13 @@ export class Login {
 
     this.authService.login(dto).subscribe({
       next: (res: any) => {
-        console.log(res);
         localStorage.setItem('token', res.body.token);
         this.router.navigate(['/dashboard']);
+        this.isLoading = false;
       },
       error: (err) => {
-        console.error(err);
-        alert('Invalid credentials.');
+        this.toastr.error('Invalid credentials.', 'Error');
+        this.isLoading = false;
       },
     });
   }

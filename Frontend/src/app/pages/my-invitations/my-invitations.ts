@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NgIf, NgFor, DatePipe, NgClass } from '@angular/common';
 import { InvitationService } from '../../services/invitation';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-my-invitations',
@@ -13,7 +14,7 @@ export class MyInvitations implements OnInit {
   invitations: any[] = [];
   loading = true;
 
-  constructor(private invitationService: InvitationService) {}
+  constructor(private invitationService: InvitationService, private toastr: ToastrService) {}
 
   ngOnInit() {
     this.load();
@@ -28,7 +29,7 @@ export class MyInvitations implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        console.error(err);
+        this.toastr.error('Failed to load invitations', 'Error');
         this.loading = false;
       },
     });
@@ -37,11 +38,10 @@ export class MyInvitations implements OnInit {
   accept(id: string) {
     this.invitationService.acceptInvitation(id).subscribe({
       next: () => {
-        alert('Invitation accepted');
-        this.load();
+this.toastr.success('Invitation accepted', 'Success');        this.load();
       },
       error: (err) => {
-        alert(err.error?.message || 'Error');
+        this.toastr.error(err.error?.message || 'Error', 'Error');
       },
     });
   }
@@ -49,11 +49,11 @@ export class MyInvitations implements OnInit {
   reject(id: string) {
     this.invitationService.rejectInvitation(id).subscribe({
       next: () => {
-        alert('Invitation rejected');
+        this.toastr.success('Invitation rejected', 'Success');
         this.load();
       },
       error: (err) => {
-        alert(err.error?.message || 'Error');
+        this.toastr.error(err.error?.message || 'Error', 'Error');
       },
     });
   }

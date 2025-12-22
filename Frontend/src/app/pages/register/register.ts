@@ -3,6 +3,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { CommonModule, NgIf } from '@angular/common';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-register',
@@ -23,7 +24,7 @@ export class Register {
   // Validation flags
   submitted = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService, private router: Router, private toastr: ToastrService) {}
 
   passwordsMatch(): boolean {
     return this.password === this.confirmPassword;
@@ -44,18 +45,17 @@ export class Register {
 
     this.authService.register(dto).subscribe({
       next: (res) => {
-        alert(res.body.message);
+        this.toastr.success(res.body.message, 'Success');
+
         this.router.navigate(['/login']);
       },
       error: (err) => {
-        console.error(err);
-        if (err.error.message) alert(`Registration failed: ${err.error.message}`);
+        this.toastr.error(err.error?.message || 'Registration failed', 'Error');
+        if (err.error.message) this.toastr.error(`Registration failed: ${err.error.message}`, 'Error');
         else
-          alert(
-            `Registration failed: ${
+            this.toastr.error(`Registration failed: ${
               err.error.errors.Name[0] || err.error.errors.Email[0] || err.error.errors.Password[0]
-            }`
-          );
+            }`, 'Error');
       },
     });
   }
