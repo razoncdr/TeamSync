@@ -6,7 +6,7 @@ namespace TeamSync.Infrastructure.Messaging.Consumers;
 public class ProjectUpdatedConsumer : RabbitMqConsumerBase
 {
 	public ProjectUpdatedConsumer(RabbitMqSettings settings)
-		: base(settings, "teamsync.project.updated.queue", "project.updated")
+		: base(settings, "teamsync.tasks.exchange", "teamsync.project.updated.queue", "project.updated")
 	{
 	}
 

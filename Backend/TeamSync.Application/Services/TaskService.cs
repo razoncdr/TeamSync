@@ -1,5 +1,6 @@
 ﻿using TeamSync.Application.Common.Exceptions;
 using TeamSync.Application.DTOs.Task;
+using TeamSync.Application.Events;
 using TeamSync.Application.Exceptions;
 using TeamSync.Application.Interfaces.Repositories;
 using TeamSync.Application.Interfaces.Services;
@@ -11,11 +12,17 @@ namespace TeamSync.Application.Services
     {
         private readonly ITaskRepository _taskRepository;
         private readonly IProjectMemberRepository _memberRepository;
+        private readonly IRedisCacheService _redis;
+        private readonly IEventPublisher _publisher;
 
-        public TaskService(ITaskRepository taskRepository, IProjectMemberRepository memberRepository)
+
+        public TaskService(ITaskRepository taskRepository, IProjectMemberRepository memberRepository, IRedisCacheService redis,
+    IEventPublisher publisher)
         {
             _taskRepository = taskRepository;
             _memberRepository = memberRepository;
+            _redis = redis;
+            _publisher = publisher;
         }
 
         private async Task EnsureProjectMemberAsync(string projectId, string userId)
@@ -28,7 +35,17 @@ namespace TeamSync.Application.Services
         public async Task<List<TaskItem>> GetTasksByProjectAsync(string projectId, string currentUserId)
         {
             await EnsureProjectMemberAsync(projectId, currentUserId);
-            return await _taskRepository.GetByProjectIdAsync(projectId);
+            var cacheKey = $"tasks:project:{projectId}";
+
+            var cached = await _redis.GetAsync<List<TaskItem>>(cacheKey);
+            if (cached != null)
+                return cached;
+
+            var tasks = await _taskRepository.GetByProjectIdAsync(projectId);
+
+            await _redis.SetAsync(cacheKey, tasks, TimeSpan.FromSeconds(60));
+
+            return tasks;
         }
 
         public async Task<TaskItem> GetByIdAsync(string id, string projectId, string currentUserId)
@@ -61,6 +78,18 @@ namespace TeamSync.Application.Services
             };
 
             await _taskRepository.AddAsync(task);
+
+            await _redis.RemoveAsync($"tasks:project:{projectId}");
+            await _publisher.PublishAsync(
+                exchange: "teamsync.tasks.exchange",
+                routingKey: "task.created",
+                new TaskCreatedEvent
+                {
+                    TaskId = task.Id,
+                    ProjectId = projectId,
+                    CreatedBy = currentUserId,
+                    CreatedAt = task.CreatedAt
+                });
             return task;
         }
 
@@ -82,6 +111,20 @@ namespace TeamSync.Application.Services
             existing.UpdatedAt = DateTime.UtcNow;
 
             await _taskRepository.UpdateAsync(existing);
+
+            await _redis.RemoveAsync($"tasks:project:{projectId}");
+
+            await _publisher.PublishAsync(
+                exchange: "teamsync.tasks.exchange",
+                routingKey: "task.updated",
+                new TaskUpdatedEvent
+                {
+                    TaskId = existing.Id,
+                    ProjectId = projectId,
+                    UpdatedBy = currentUserId,
+                    UpdatedAt = existing.UpdatedAt ?? DateTime.UtcNow
+                });
+
             return existing;
         }
 
@@ -96,6 +139,19 @@ namespace TeamSync.Application.Services
                 throw new ForbiddenException("Task does not belong to this project.");
 
             await _taskRepository.DeleteAsync(id);
+
+            await _redis.RemoveAsync($"tasks:project:{projectId}");
+
+            await _publisher.PublishAsync(
+                exchange: "teamsync.tasks.exchange",
+                routingKey: "task.deleted",
+                new TaskDeletedEvent
+                {
+                    TaskId = task.Id,
+                    ProjectId = projectId,
+                    DeletedBy = currentUserId
+                });
         }
+
     }
 }

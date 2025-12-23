@@ -26,12 +26,14 @@ public class RabbitMqEventPublisher : IEventPublisher, IDisposable
 		_channel = _connection.CreateChannelAsync().Result;
 
 		// Declare exchange (topic)
-		_channel.ExchangeDeclareAsync(
-			exchange: settings.Exchange,
-			type: "topic",
-			durable: true
-		).Wait();
-	}
+		//_channel.ExchangeDeclareAsync(
+		//	exchange: settings.Exchange,
+		//	type: "topic",
+		//	durable: true
+		//).Wait();
+        _channel.ExchangeDeclareAsync("teamsync.projects.exchange", "topic", durable: true).Wait();
+        _channel.ExchangeDeclareAsync("teamsync.tasks.exchange", "topic", durable: true).Wait();
+    }
 
 	public async Task PublishAsync(string exchange, string routingKey, object message)
 	{
