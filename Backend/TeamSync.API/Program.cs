@@ -72,6 +72,10 @@ builder.Services.AddSingleton<RabbitMqSettings>();
 // RabbitMQ background consumers
 builder.Services.AddHostedService<ProjectCreatedConsumer>();
 builder.Services.AddHostedService<ProjectUpdatedConsumer>();
+builder.Services.AddHostedService<TaskCreatedConsumer>();
+builder.Services.AddHostedService<TaskUpdatedConsumer>();
+builder.Services.AddHostedService<TaskDeletedConsumer>();
+
 
 // Infrastructure layer DI
 builder.Services.AddInfrastructure(builder.Configuration);

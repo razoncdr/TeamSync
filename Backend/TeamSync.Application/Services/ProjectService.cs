@@ -153,7 +153,7 @@ namespace TeamSync.Application.Services
 			);
 
 			// Invalidate per-user project IDs cache
-			await _redisCacheService.RemoveAsync($"user:{userId}:projectIds");
+			//await _redisCacheService.RemoveAsync($"user:{userId}:projectIds");
 
 			return new ProjectResponseDto
 			{
@@ -178,16 +178,16 @@ namespace TeamSync.Application.Services
 			await _projectRepository.UpdateAsync(existing);
 
 			await _publisher.PublishAsync(
-	exchange: "teamsync.projects.exchange",
-	routingKey: "project.updated",
-	new ProjectUpdatedEvent
-	{
-		ProjectId = existing.Id,
-		NewName = dto.Name,
-		NewDescription = dto.Description,
-		UpdatedAt = DateTime.UtcNow
-	}
-);
+				exchange: "teamsync.projects.exchange",
+				routingKey: "project.updated",
+				new ProjectUpdatedEvent
+				{
+					ProjectId = existing.Id,
+					NewName = dto.Name,
+					NewDescription = dto.Description,
+					UpdatedAt = DateTime.UtcNow
+				}
+			);
 
 
 			// Invalidate per-project cache

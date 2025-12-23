@@ -9,7 +9,7 @@ public class ProjectCreatedConsumer : RabbitMqConsumerBase
 	private readonly IRedisCacheService _redis;
 
 	public ProjectCreatedConsumer(RabbitMqSettings settings, IRedisCacheService redis)
-		: base(settings, "teamsync.project.created.queue", "project.created")
+		: base(settings, "teamsync.tasks.exchange", "teamsync.project.created.queue", "project.created")
 	{
 		_redis = redis;
 	}
@@ -18,9 +18,9 @@ public class ProjectCreatedConsumer : RabbitMqConsumerBase
 	{
 		var evt = JsonSerializer.Deserialize<ProjectCreatedEvent>(json);
 
-		// Example: clear Redis related to the user
 		await _redis.RemoveAsync($"user:{evt.CreatedBy}:projectIds");
+		//await _mailService.sendProjectCreatedNotificationAsync(evt);
 
-		Console.WriteLine($"[ProjectCreatedConsumer] Processed event for {evt.ProjectId}");
+        Console.WriteLine($"[ProjectCreatedConsumer] Processed event for {evt.ProjectId}");
 	}
 }
