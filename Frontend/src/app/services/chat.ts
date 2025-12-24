@@ -7,7 +7,7 @@ export interface ApiResponse<T> {
   data: T;
 }
 
-export interface ChatMessage {
+export interface Notification {
   id: string;
   senderId: string;
   senderName: string;
@@ -37,8 +37,8 @@ export class ChatService {
   projectId: string,
   skip = 0,
   limit = 20
-): Observable<ApiResponse<ChatMessage[]>> {
-  return this.http.get<ApiResponse<ChatMessage[]>>(
+): Observable<ApiResponse<Notification[]>> {
+  return this.http.get<ApiResponse<Notification[]>>(
     `${this.baseUrl}/${projectId}/chat?skip=${skip}&limit=${limit}`,
     this.getAuthHeaders()
   );
@@ -49,8 +49,8 @@ export class ChatService {
   sendMessage(
     projectId: string,
     message: string
-  ): Observable<ApiResponse<ChatMessage>> {
-    return this.http.post<ApiResponse<ChatMessage>>(
+  ): Observable<ApiResponse<Notification>> {
+    return this.http.post<ApiResponse<Notification>>(
       `${this.baseUrl}/${projectId}/chat`,
       { message },
       this.getAuthHeaders()

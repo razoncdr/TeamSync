@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { ChatService, ChatMessage } from '../../services/chat';
+import { ChatService, Notification } from '../../services/chat';
 import { ChatHubService } from '../../services/chat-hub';
 import { ToastrService } from 'ngx-toastr';
 
@@ -15,7 +15,7 @@ import { ToastrService } from 'ngx-toastr';
 export class ChatComponent implements OnInit, OnDestroy {
   projectId!: string;
   currentUserId!: string;
-  messages: ChatMessage[] = [];
+  messages: Notification[] = [];
 
   private readonly pageSize = 20;
   private skip = 0;
