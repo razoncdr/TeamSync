@@ -88,6 +88,7 @@ builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IProjectMemberService, ProjectMemberService>();
 builder.Services.AddScoped<IProjectInvitationService, ProjectInvitationService>();
 builder.Services.AddScoped<IChatService, ChatService>();
+builder.Services.AddSingleton<IActivityLogService, ConsoleActivityLogService>();
 
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<ITaskRepository, TaskItemRepository>();

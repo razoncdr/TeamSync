@@ -80,6 +80,7 @@ namespace TeamSync.Application.Services
             await _taskRepository.AddAsync(task);
 
             await _redis.RemoveAsync($"tasks:project:{projectId}");
+
             await _publisher.PublishAsync(
                 exchange: "teamsync.tasks.exchange",
                 routingKey: "task.created",
