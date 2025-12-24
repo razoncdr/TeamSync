@@ -87,6 +87,9 @@ builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IProjectMemberService, ProjectMemberService>();
 builder.Services.AddScoped<IProjectInvitationService, ProjectInvitationService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
+
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddSingleton<IActivityLogService, ConsoleActivityLogService>();
 
@@ -95,8 +98,10 @@ builder.Services.AddScoped<ITaskRepository, TaskItemRepository>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
 builder.Services.AddScoped<IProjectInvitationRepository, ProjectInvitationRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
-builder.Services.AddScoped<IChatNotifier, SignalRChatNotifier>();
+builder.Services.AddScoped<IChatNotifier, SignalRNotifier>();
+builder.Services.AddScoped<INotificationNotifier, SignalRNotifier>();
 
 var redis = ConnectionMultiplexer.Connect("localhost:6379");
 builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
@@ -184,5 +189,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<ChatHub>("/hubs/chat");
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 app.Run();

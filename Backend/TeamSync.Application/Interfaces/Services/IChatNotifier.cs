@@ -2,7 +2,7 @@
 {
     public interface IChatNotifier
     {
-        Task NotifyMessageCreatedAsync(
+        Task MessageCreatedAsync(
             string projectId,
             object messageDto
         );

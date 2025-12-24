@@ -15,7 +15,15 @@ namespace TeamSync.Infrastructure.Repositories
 		public Task<List<ProjectMember>> GetAllByProjectAsync(string projectId) =>
 			Collection.Find(m => m.ProjectId == projectId).ToListAsync();
 
-		public Task<List<ProjectMember>> GetAllByUserIdAsync(string userId) =>
+        public async Task<List<string>> GetUserIdsByProjectIdAsync(string projectId)
+        {
+            return await Collection
+                .Find(m => m.ProjectId == projectId)
+                .Project(m => m.UserId)
+                .ToListAsync();
+        }
+
+        public Task<List<ProjectMember>> GetAllByUserIdAsync(string userId) =>
 			Collection.Find(m => m.UserId == userId).ToListAsync();
 
 		public Task<bool> ExistsByUserIdAsync(string projectId, string userId) =>

@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
-import { ChatMessage } from './chat';
+import { Notification } from './chat';
 
 @Injectable({ providedIn: 'root' })
 export class ChatHubService {
   private connection!: signalR.HubConnection;
 
-  start(projectId: string, onMessage: (msg: ChatMessage) => void) {
+  start(projectId: string, onMessage: (msg: Notification) => void) {
     this.connection = new signalR.HubConnectionBuilder()
       .withUrl('https://localhost:7035/hubs/chat', {
         accessTokenFactory: () => localStorage.getItem('token') || '',
