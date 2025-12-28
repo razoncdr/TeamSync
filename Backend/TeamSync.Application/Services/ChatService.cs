@@ -91,7 +91,7 @@ namespace TeamSync.Application.Services
             await _redis.ListTrimAsync(chatsCacheKey, -20, -1);
 
             // Notify SignalR group
-            await _chatNotifier.NotifyMessageCreatedAsync(
+            await _chatNotifier.MessageCreatedAsync(
                 projectId,
                 new
                 {
