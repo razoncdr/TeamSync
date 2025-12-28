@@ -75,6 +75,8 @@ builder.Services.AddHostedService<ProjectUpdatedConsumer>();
 builder.Services.AddHostedService<TaskCreatedConsumer>();
 builder.Services.AddHostedService<TaskUpdatedConsumer>();
 builder.Services.AddHostedService<TaskDeletedConsumer>();
+builder.Services.AddHostedService<TaskAssignedConsumer>();
+builder.Services.AddHostedService<TaskUnassignedConsumer>();
 
 
 // Infrastructure layer DI
@@ -83,6 +85,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // Dependency Injection for services
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IProjectMemberService, ProjectMemberService>();

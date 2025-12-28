@@ -29,9 +29,7 @@ namespace TeamSync.API.Realtime
                 .SendAsync("ReceiveMessage", messageDto);
         }
 
-        public async Task TaskCreatedAsync(
-            string userId,
-            TaskCreatedEvent evt)
+        public async Task TaskCreatedAsync(string userId, TaskCreatedEvent evt)
         {
             await _notificationHub.Clients
                 .Group($"user:{userId}")
@@ -41,6 +39,28 @@ namespace TeamSync.API.Realtime
                     $"Task '{evt.TaskId}' was added to the project",
                     new { evt.TaskId, evt.ProjectId }
                 );
+        }
+
+        public Task TaskAssignedAsync(string userId, TaskAssignedEvent evt)
+        {
+            return _notificationHub.Clients.User(userId)
+                .SendAsync("TaskAssigned", new
+                {
+                    evt.TaskId,
+                    evt.ProjectId,
+                    Message = "You were assigned to a task"
+                });
+        }
+
+        public Task TaskUnassignedAsync(string userId, TaskUnassignedEvent evt)
+        {
+            return _notificationHub.Clients.User(userId)
+                .SendAsync("TaskUnassigned", new
+                {
+                    evt.TaskId,
+                    evt.ProjectId,
+                    Message = "You were removed from a task"
+                });
         }
     }
 }

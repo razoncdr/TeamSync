@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { TaskService } from '../../services/task';
 import { ProjectService } from '../../services/project';
 import { ToastrService } from 'ngx-toastr';
+import { MemberService } from '../../services/member';
 
 @Component({
   selector: 'app-project-dashboard',
@@ -34,12 +35,14 @@ export class ProjectDashboard implements OnInit {
     private route: ActivatedRoute,
     private taskService: TaskService,
     private projectService: ProjectService, 
+    private memberService: MemberService,
     private toastr: ToastrService
   ) {}
 
   ngOnInit() {
     this.projectId = this.route.snapshot.paramMap.get('projectId')!;
     this.loadProject();
+    this.loadProjectMembers();
     this.loadTasks();
   }
 
@@ -47,9 +50,17 @@ export class ProjectDashboard implements OnInit {
     this.projectService.getProjectById(this.projectId).subscribe({
       next: (res) => {
         this.projectName = res.data.name;
-        this.projectMembers = res.data.members || [];
       },
       error: (err) => this.toastr.error('Failed to load project', 'Error'),
+    });
+  }
+
+  loadProjectMembers() {
+    this.memberService.getMembers(this.projectId).subscribe({
+      next: (res) => {
+        this.projectMembers = res.data || [];
+      },
+      error: (err) => this.toastr.error('Failed to load project members', 'Error'),
     });
   }
 

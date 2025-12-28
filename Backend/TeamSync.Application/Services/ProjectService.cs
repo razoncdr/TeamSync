@@ -1,6 +1,7 @@
 ﻿using Pipelines.Sockets.Unofficial.Arenas;
 using TeamSync.Application.Common.Exceptions;
 using TeamSync.Application.DTOs.Project;
+using TeamSync.Application.DTOs;
 using TeamSync.Application.Events;
 using TeamSync.Application.Exceptions;
 using TeamSync.Application.Interfaces.Repositories;
@@ -12,13 +13,15 @@ namespace TeamSync.Application.Services
 {
 	public class ProjectService : IProjectService
 	{
-		private readonly IProjectRepository _projectRepository;
+		private readonly IProjectMemberService _memberService;
+        private readonly IProjectRepository _projectRepository;
 		private readonly ITaskRepository _taskRepository;
 		private readonly IProjectMemberRepository _memberRepository;
 		private readonly IRedisCacheService _redisCacheService;
 		private readonly IEventPublisher _publisher;
 
 		public ProjectService(
+			IProjectMemberService memberService,
 			IProjectRepository projectRepository,
 			ITaskRepository taskRepository,
 			IProjectMemberRepository memberRepository,
@@ -26,6 +29,7 @@ namespace TeamSync.Application.Services
 			IEventPublisher publisher
 			)
 		{
+			_memberService = memberService;
 			_projectRepository = projectRepository;
 			_taskRepository = taskRepository;
 			_memberRepository = memberRepository;
@@ -153,7 +157,7 @@ namespace TeamSync.Application.Services
 			);
 
 			// Invalidate per-user project IDs cache
-			//await _redisCacheService.RemoveAsync($"user:{userId}:projectIds");
+			await _redisCacheService.RemoveAsync($"user:{userId}:projectIds");
 
 			return new ProjectResponseDto
 			{

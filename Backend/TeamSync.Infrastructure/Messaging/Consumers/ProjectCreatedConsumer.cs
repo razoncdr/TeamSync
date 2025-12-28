@@ -18,7 +18,7 @@ public class ProjectCreatedConsumer : RabbitMqConsumerBase
 	{
 		var evt = JsonSerializer.Deserialize<ProjectCreatedEvent>(json);
 
-		await _redis.RemoveAsync($"user:{evt.CreatedBy}:projectIds");
+		//await _redis.RemoveAsync($"user:{evt.CreatedBy}:projectIds");
 		//await _mailService.sendProjectCreatedNotificationAsync(evt);
 
         Console.WriteLine($"[ProjectCreatedConsumer] Processed event for {evt.ProjectId}");

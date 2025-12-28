@@ -106,8 +106,8 @@
         <!-- ASSIGNED MEMBERS -->
         <label>Assigned Members</label>
         <select multiple [(ngModel)]="taskForm.assignedMemberIds" name="assignedMemberIds">
-          <option *ngFor="let member of projectMembers" [value]="member.id">
-            {{ member.name }}
+          <option *ngFor="let member of projectMembers" [value]="member.userId">
+            {{ member.email }}
           </option>
         </select>
 

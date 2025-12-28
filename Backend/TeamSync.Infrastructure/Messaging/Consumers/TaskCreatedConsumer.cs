@@ -38,10 +38,8 @@ public class TaskCreatedConsumer : RabbitMqConsumerBase
 
         var members = await projectMemberRepo.GetUserIdsByProjectIdAsync(evt.ProjectId);
 
-        Console.WriteLine("Members: ");
         foreach (var userId in members)
         {
-            Console.Write(userId);
             if (userId == evt.CreatedBy) continue;
 
             await notificationService.CreateAsync(

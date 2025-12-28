@@ -11,5 +11,8 @@ namespace TeamSync.Infrastructure.Repositories
 
 		public Task<User?> GetByEmailAsync(string email) =>
 			Collection.Find(u => u.Email == email).FirstOrDefaultAsync();
-	}
+
+		public Task<List<User>> GetByIdsAsync(List<string> ids) =>
+			Collection.Find(u => ids.Contains(u.Id)).ToListAsync();
+    }
 }

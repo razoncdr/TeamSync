@@ -9,7 +9,7 @@
 
   <table *ngIf="!loading">
     <tr>
-      <th>User ID</th>
+      <th>Username</th>
       <th>Email</th>
       <th>Role</th>
       <th>Joined</th>
@@ -17,7 +17,7 @@
     </tr>
 
     <tr *ngFor="let m of members">
-      <td>{{ m.userId }}</td>
+      <td>{{ m.name }}</td>
       <td>{{ m.email }}</td>
       <td>
         <span

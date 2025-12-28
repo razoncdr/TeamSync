@@ -91,6 +91,22 @@ namespace TeamSync.Application.Services
                     CreatedBy = currentUserId,
                     CreatedAt = task.CreatedAt
                 });
+            // Notify assigned users
+            foreach (var userId in task.AssignedMemberIds)
+            {
+                await _publisher.PublishAsync(
+                    "teamsync.tasks.exchange",
+                    "task.assigned",
+                    new TaskAssignedEvent
+                    {
+                        TaskId = task.Id,
+                        ProjectId = projectId,
+                        AssignedToUserId = userId,
+                        AssignedBy = currentUserId,
+                        AssignedAt = DateTime.UtcNow
+                    }
+                );
+            }
             return task;
         }
 
@@ -103,6 +119,13 @@ namespace TeamSync.Application.Services
 
             if (existing.ProjectId != projectId)
                 throw new ForbiddenException("Task does not belong to this project.");
+
+            var oldAssigned = existing.AssignedMemberIds.ToHashSet();
+            var newAssigned = (dto.AssignedMemberIds ?? new List<string>()).ToHashSet();
+
+            var newlyAssigned = newAssigned.Except(oldAssigned).ToList();
+            var unassigned = oldAssigned.Except(newAssigned).ToList();
+
 
             existing.Title = dto.Title;
             existing.Description = dto.Description;
@@ -125,6 +148,36 @@ namespace TeamSync.Application.Services
                     UpdatedBy = currentUserId,
                     UpdatedAt = existing.UpdatedAt ?? DateTime.UtcNow
                 });
+
+            foreach (var userId in newlyAssigned)
+            {
+                await _publisher.PublishAsync(
+                    "teamsync.tasks.exchange",
+                    "task.assigned",
+                    new TaskAssignedEvent
+                    {
+                        TaskId = existing.Id,
+                        ProjectId = projectId,
+                        AssignedToUserId = userId,
+                        AssignedBy = currentUserId,
+                        AssignedAt = DateTime.UtcNow
+                    });
+            }
+
+            foreach (var userId in unassigned)
+            {
+                await _publisher.PublishAsync(
+                    "teamsync.tasks.exchange",
+                    "task.unassigned",
+                    new TaskUnassignedEvent
+                    {
+                        TaskId = existing.Id,
+                        ProjectId = projectId,
+                        UnassignedFromUserId = userId,
+                        ActionBy = currentUserId,
+                        ActionAt = DateTime.UtcNow
+                    });
+            }
 
             return existing;
         }
